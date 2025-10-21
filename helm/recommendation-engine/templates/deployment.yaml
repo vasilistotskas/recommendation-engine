@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "recommendation-engine.fullname" . }}
+  labels:
+    {{- include "recommendation-engine.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "recommendation-engine.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "recommendation-engine.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "recommendation-engine.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: log_level
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: database_url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: redis_url
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: api_key
+        - name: RUST_BACKTRACE
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: rust_backtrace
+        - name: COLLABORATIVE_WEIGHT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: collaborative_weight
+        - name: CONTENT_WEIGHT
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: content_weight
+        - name: CACHE_TTL_RECOMMENDATIONS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: cache_ttl_recommendations
+        - name: CACHE_TTL_TRENDING
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: cache_ttl_trending
+        - name: RATE_LIMIT_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: rate_limit_requests
+        - name: RATE_LIMIT_WINDOW_SECS
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "recommendation-engine.fullname" . }}
+              key: rate_limit_window_secs
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 12 }}
+        readinessProbe:
+          {{- toYaml .Values.readinessProbe | nindent 12 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        {{- with .Values.lifecycle }}
+        lifecycle:
+          {{- toYaml . | nindent 12 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}

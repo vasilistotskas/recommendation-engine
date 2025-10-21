@@ -1,12 +1,12 @@
+use chrono::Utc;
 use recommendation_models::{
-    Entity, AttributeValue, TenantContext, RecommendationError, Result,
-    FeatureExtractor, DefaultFeatureExtractor,
+    AttributeValue, DefaultFeatureExtractor, Entity, FeatureExtractor, RecommendationError, Result,
+    TenantContext,
 };
 use recommendation_storage::VectorStore;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tracing::{info, debug, warn};
-use chrono::Utc;
+use tracing::{debug, info, warn};
 
 /// Service for entity lifecycle management
 /// Handles entity CRUD operations, feature vector computation, and validation
@@ -20,7 +20,7 @@ impl EntityService {
     pub fn new(vector_store: Arc<VectorStore>) -> Self {
         let feature_dimension = 512; // Default dimension
         let feature_extractor = Arc::new(DefaultFeatureExtractor::new(feature_dimension));
-        
+
         Self {
             vector_store,
             feature_extractor,
@@ -59,9 +59,10 @@ impl EntityService {
         self.validate_attributes(&attributes)?;
 
         // Check for uniqueness within entity_type
-        if let Some(_existing) = self.vector_store
+        if let Some(_existing) = self
+            .vector_store
             .get_entity(ctx, &entity_id, &entity_type)
-            .await? 
+            .await?
         {
             return Err(RecommendationError::InvalidRequest(format!(
                 "Entity with id '{}' and type '{}' already exists for tenant '{}'",
@@ -73,7 +74,8 @@ impl EntityService {
         let feature_vector = self.compute_feature_vector(&attributes)?;
 
         // Create entity in storage
-        let entity = self.vector_store
+        let entity = self
+            .vector_store
             .create_entity(
                 ctx,
                 &entity_id,
@@ -108,7 +110,8 @@ impl EntityService {
         self.validate_attributes(&attributes)?;
 
         // Check if entity exists
-        if self.vector_store
+        if self
+            .vector_store
             .get_entity(ctx, &entity_id, &entity_type)
             .await?
             .is_none()
@@ -123,7 +126,8 @@ impl EntityService {
         let feature_vector = self.compute_feature_vector(&attributes)?;
 
         // Update entity in storage
-        let entity = self.vector_store
+        let entity = self
+            .vector_store
             .update_entity(
                 ctx,
                 &entity_id,
@@ -276,9 +280,10 @@ impl EntityService {
         const MAX_DEPTH: usize = 3;
 
         if depth >= MAX_DEPTH {
-            return Err(RecommendationError::ValidationError(
-                format!("attribute nesting cannot exceed {} levels", MAX_DEPTH),
-            ));
+            return Err(RecommendationError::ValidationError(format!(
+                "attribute nesting cannot exceed {} levels",
+                MAX_DEPTH
+            )));
         }
 
         match value {
@@ -337,7 +342,7 @@ impl EntityService {
 
         // Process in batches of 1000
         const BATCH_SIZE: usize = 1000;
-        
+
         for (batch_idx, batch) in entities.chunks(BATCH_SIZE).enumerate() {
             debug!(
                 "EntityService: Processing batch {} of {} (size: {})",
@@ -401,7 +406,8 @@ impl EntityService {
 
             // Batch insert valid entities
             if !batch_entities.is_empty() {
-                match self.vector_store
+                match self
+                    .vector_store
                     .batch_insert_entities(ctx, batch_entities.clone())
                     .await
                 {
@@ -469,7 +475,8 @@ impl EntityService {
             ctx.tenant_id, entity_type, last_modified_after
         );
 
-        let entities = self.vector_store
+        let entities = self
+            .vector_store
             .export_entities(ctx, entity_type, last_modified_after)
             .await?;
 
@@ -557,7 +564,10 @@ mod tests {
 
         // Valid attributes
         let mut valid_attrs = HashMap::new();
-        valid_attrs.insert("name".to_string(), AttributeValue::String("Product".to_string()));
+        valid_attrs.insert(
+            "name".to_string(),
+            AttributeValue::String("Product".to_string()),
+        );
         valid_attrs.insert("price".to_string(), AttributeValue::Number(99.99));
         assert!(service.validate_attributes(&valid_attrs).is_ok());
 

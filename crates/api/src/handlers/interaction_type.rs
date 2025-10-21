@@ -1,12 +1,12 @@
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use recommendation_models::{
-    RegisterInteractionTypeRequest, UpdateInteractionTypeRequest,
-    ListInteractionTypesResponse, TenantContext,
+    ListInteractionTypesResponse, RegisterInteractionTypeRequest, TenantContext,
+    UpdateInteractionTypeRequest,
 };
 use tracing::{debug, error};
 
@@ -88,7 +88,7 @@ pub async fn get_interaction_type(
     match registered {
         Some(it) => Ok((StatusCode::OK, Json(it))),
         None => Err(ApiError::BadRequest(
-            "Interaction type not found".to_string()
+            "Interaction type not found".to_string(),
         )),
     }
 }

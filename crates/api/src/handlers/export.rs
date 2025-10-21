@@ -1,6 +1,6 @@
 use axum::{
     extract::{Query, State},
-    http::{header, StatusCode},
+    http::{StatusCode, header},
     response::IntoResponse,
 };
 use chrono::{DateTime, Utc};
@@ -53,7 +53,7 @@ fn default_format() -> String {
 
 /// Export entities endpoint
 /// GET /api/v1/export/entities
-/// 
+///
 /// Query parameters:
 /// - entity_type: optional filter by entity type
 /// - format: "json" or "csv" (default: "json")
@@ -134,7 +134,7 @@ pub async fn export_entities(
 
 /// Export interactions endpoint
 /// GET /api/v1/export/interactions
-/// 
+///
 /// Query parameters:
 /// - start_date: optional start date for filtering
 /// - end_date: optional end date for filtering
@@ -211,7 +211,7 @@ pub async fn export_interactions(
 
 /// Export users endpoint
 /// GET /api/v1/export/users
-/// 
+///
 /// Query parameters:
 /// - include_vectors: whether to include preference vectors (default: false)
 /// - format: "json" or "csv" (default: "json")
@@ -287,12 +287,13 @@ pub async fn export_users(
 
 /// Convert entities to CSV format
 fn entities_to_csv(entities: &[recommendation_models::Entity]) -> Result<String, ApiError> {
-    let mut csv = String::from("entity_id,entity_type,attributes,tenant_id,created_at,updated_at\n");
+    let mut csv =
+        String::from("entity_id,entity_type,attributes,tenant_id,created_at,updated_at\n");
 
     for entity in entities {
-        let attributes_json = serde_json::to_string(&entity.attributes)
-            .map_err(|e| ApiError::Internal(e.into()))?;
-        
+        let attributes_json =
+            serde_json::to_string(&entity.attributes).map_err(|e| ApiError::Internal(e.into()))?;
+
         csv.push_str(&format!(
             "\"{}\",\"{}\",\"{}\",\"{}\",\"{}\",\"{}\"\n",
             entity.entity_id,
@@ -311,7 +312,8 @@ fn entities_to_csv(entities: &[recommendation_models::Entity]) -> Result<String,
 fn interactions_to_csv(
     interactions: &[recommendation_models::Interaction],
 ) -> Result<String, ApiError> {
-    let mut csv = String::from("user_id,entity_id,interaction_type,weight,metadata,tenant_id,timestamp\n");
+    let mut csv =
+        String::from("user_id,entity_id,interaction_type,weight,metadata,tenant_id,timestamp\n");
 
     for interaction in interactions {
         let metadata_json = if let Some(ref metadata) = interaction.metadata {
@@ -343,9 +345,13 @@ fn users_to_csv(
     include_vectors: bool,
 ) -> Result<String, ApiError> {
     let mut csv = if include_vectors {
-        String::from("user_id,interaction_count,preference_vector,tenant_id,last_interaction_at,created_at,updated_at\n")
+        String::from(
+            "user_id,interaction_count,preference_vector,tenant_id,last_interaction_at,created_at,updated_at\n",
+        )
     } else {
-        String::from("user_id,interaction_count,tenant_id,last_interaction_at,created_at,updated_at\n")
+        String::from(
+            "user_id,interaction_count,tenant_id,last_interaction_at,created_at,updated_at\n",
+        )
     };
 
     for user in users {

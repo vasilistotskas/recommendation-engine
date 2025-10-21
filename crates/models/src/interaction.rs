@@ -71,7 +71,10 @@ mod tests {
         assert_eq!(InteractionType::Purchase.default_weight(), 5.0);
         assert_eq!(InteractionType::Like.default_weight(), 2.0);
         assert_eq!(InteractionType::Rating(4.5).default_weight(), 4.5);
-        assert_eq!(InteractionType::Custom("share".to_string()).default_weight(), 1.0);
+        assert_eq!(
+            InteractionType::Custom("share".to_string()).default_weight(),
+            1.0
+        );
     }
 
     #[test]
@@ -82,9 +85,10 @@ mod tests {
             entity_id: "prod_101".to_string(),
             interaction_type: InteractionType::Like,
             weight: 2.0,
-            metadata: Some(HashMap::from([
-                ("source".to_string(), "mobile_app".to_string()),
-            ])),
+            metadata: Some(HashMap::from([(
+                "source".to_string(),
+                "mobile_app".to_string(),
+            )])),
             tenant_id: Some("tenant_b".to_string()),
             timestamp: Utc::now(),
         };

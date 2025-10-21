@@ -1,6 +1,6 @@
+use crate::webhook::{WebhookDelivery, WebhookEvent};
 use recommendation_models::{Result, TenantContext};
 use recommendation_storage::{RedisCache, VectorStore};
-use crate::webhook::{WebhookDelivery, WebhookEvent};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::{interval, sleep};
@@ -28,7 +28,9 @@ impl ModelUpdater {
     ) -> Self {
         info!(
             "Initializing ModelUpdater with intervals: incremental={}s, full_rebuild={}h, trending={}h, webhooks={}",
-            incremental_interval_secs, full_rebuild_interval_hours, trending_interval_hours,
+            incremental_interval_secs,
+            full_rebuild_interval_hours,
+            trending_interval_hours,
             webhook_delivery.is_some()
         );
 
@@ -188,7 +190,10 @@ impl ModelUpdater {
                     let _ = self.cache.delete_pattern(&cache_key).await;
                 }
                 Err(e) => {
-                    warn!("Failed to update preference vector for user {}: {:?}", user_id, e);
+                    warn!(
+                        "Failed to update preference vector for user {}: {:?}",
+                        user_id, e
+                    );
                 }
             }
         }
@@ -216,7 +221,10 @@ impl ModelUpdater {
                     updated_count += 1;
                 }
                 Err(e) => {
-                    warn!("Failed to update feature vector for entity {}: {:?}", entity_id, e);
+                    warn!(
+                        "Failed to update feature vector for entity {}: {:?}",
+                        entity_id, e
+                    );
                 }
             }
         }
@@ -228,7 +236,10 @@ impl ModelUpdater {
     async fn invalidate_affected_cache(&self, ctx: &TenantContext) -> Result<usize> {
         // Invalidate trending cache for this tenant
         let trending_pattern = format!("trending:{}:*", ctx.tenant_id);
-        let count = self.cache.delete_pattern(&trending_pattern).await
+        let count = self
+            .cache
+            .delete_pattern(&trending_pattern)
+            .await
             .map_err(|e| recommendation_models::RecommendationError::CacheError(e.to_string()))?;
         Ok(count)
     }
@@ -358,7 +369,10 @@ impl ModelUpdater {
                     updated_count += 1;
                 }
                 Err(e) => {
-                    warn!("Failed to rebuild preference vector for user {}: {:?}", user_id, e);
+                    warn!(
+                        "Failed to rebuild preference vector for user {}: {:?}",
+                        user_id, e
+                    );
                 }
             }
 
@@ -386,7 +400,10 @@ impl ModelUpdater {
                     updated_count += 1;
                 }
                 Err(e) => {
-                    warn!("Failed to rebuild feature vector for entity {}: {:?}", entity_id, e);
+                    warn!(
+                        "Failed to rebuild feature vector for entity {}: {:?}",
+                        entity_id, e
+                    );
                 }
             }
 
@@ -402,14 +419,10 @@ impl ModelUpdater {
     /// Rebuild vector indices for optimal query performance
     async fn rebuild_vector_indices(&self, _ctx: &TenantContext) -> Result<()> {
         // Rebuild HNSW index for entity feature vectors
-        self.vector_store
-            .rebuild_entity_vector_index(None)
-            .await?;
+        self.vector_store.rebuild_entity_vector_index(None).await?;
 
         // Rebuild HNSW index for user preference vectors
-        self.vector_store
-            .rebuild_user_vector_index(None)
-            .await?;
+        self.vector_store.rebuild_user_vector_index(None).await?;
 
         Ok(())
     }
@@ -417,8 +430,10 @@ impl ModelUpdater {
     /// Clear all caches for the tenant
     async fn clear_all_caches(&self, ctx: &TenantContext) -> Result<usize> {
         let pattern = format!("*:{}:*", ctx.tenant_id);
-        let count = self.cache.delete_pattern(&pattern).await
-            .map_err(|e| recommendation_models::RecommendationError::CacheError(e.to_string()))?;
+        let count =
+            self.cache.delete_pattern(&pattern).await.map_err(|e| {
+                recommendation_models::RecommendationError::CacheError(e.to_string())
+            })?;
         Ok(count)
     }
 }
@@ -427,10 +442,7 @@ impl ModelUpdater {
     /// Start full rebuild background task
     /// Runs every configured interval (default: 24 hours)
     /// Scheduled during low-traffic periods (e.g., 3 AM)
-    pub fn start_full_rebuild(
-        self: Arc<Self>,
-        ctx: TenantContext,
-    ) -> tokio::task::JoinHandle<()> {
+    pub fn start_full_rebuild(self: Arc<Self>, ctx: TenantContext) -> tokio::task::JoinHandle<()> {
         tokio::spawn(async move {
             let mut interval_timer = interval(self.full_rebuild_interval);
             interval_timer.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
@@ -444,7 +456,10 @@ impl ModelUpdater {
             // Calculate time until next 3 AM
             let initial_delay = self.calculate_delay_until_low_traffic();
             if initial_delay > Duration::from_secs(0) {
-                info!("Waiting {:?} until low-traffic period for first full rebuild", initial_delay);
+                info!(
+                    "Waiting {:?} until low-traffic period for first full rebuild",
+                    initial_delay
+                );
                 sleep(initial_delay).await;
             }
 
@@ -491,7 +506,10 @@ impl ModelUpdater {
     /// Calculate trending entities every 1 hour
     /// Updates Redis cache with trending results
     pub async fn update_trending(&self, ctx: &TenantContext) -> Result<()> {
-        info!("Starting trending calculation for tenant: {}", ctx.tenant_id);
+        info!(
+            "Starting trending calculation for tenant: {}",
+            ctx.tenant_id
+        );
         let start_time = std::time::Instant::now();
 
         // Get all entity types in the system
@@ -503,12 +521,18 @@ impl ModelUpdater {
         for entity_type in entity_types {
             match self.calculate_trending_for_type(ctx, &entity_type).await {
                 Ok(count) => {
-                    debug!("Calculated {} trending entities for type: {}", count, entity_type);
+                    debug!(
+                        "Calculated {} trending entities for type: {}",
+                        count, entity_type
+                    );
                     total_trending += count;
                     trending_by_type.push((entity_type.clone(), count));
                 }
                 Err(e) => {
-                    error!("Failed to calculate trending for type {}: {:?}", entity_type, e);
+                    error!(
+                        "Failed to calculate trending for type {}: {:?}",
+                        entity_type, e
+                    );
                 }
             }
         }
@@ -533,11 +557,8 @@ impl ModelUpdater {
         // Trigger trending_changed webhook for each entity type
         if self.webhook_delivery.is_some() && !trending_by_type.is_empty() {
             for (entity_type, count) in trending_by_type {
-                let event = WebhookEvent::trending_changed(
-                    ctx.tenant_id.clone(),
-                    entity_type,
-                    count,
-                );
+                let event =
+                    WebhookEvent::trending_changed(ctx.tenant_id.clone(), entity_type, count);
 
                 if let Some(webhook) = &self.webhook_delivery {
                     webhook.clone().dispatch_async(event);

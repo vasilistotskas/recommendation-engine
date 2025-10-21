@@ -1,7 +1,7 @@
 use axum::{
+    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 use recommendation_models::RecommendationError;
 use serde::Serialize;
@@ -31,7 +31,7 @@ impl IntoResponse for ApiError {
             ApiError::Recommendation(err) => {
                 let status_code = StatusCode::from_u16(err.status_code())
                     .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
-                
+
                 let body = Json(ErrorResponse {
                     error: ErrorDetail {
                         code: err.error_code().to_string(),

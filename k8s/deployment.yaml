@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-engine
+  labels:
+    app: recommendation-engine
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: recommendation-engine
+  template:
+    metadata:
+      labels:
+        app: recommendation-engine
+        version: v1
+    spec:
+      containers:
+      - name: recommendation-engine
+        image: grooveshop/recommendation-engine:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: log_level
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: recommendation-engine-secret
+              key: database_url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: recommendation-engine-secret
+              key: redis_url
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: recommendation-engine-secret
+              key: api_key
+        - name: RUST_BACKTRACE
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: rust_backtrace
+        - name: COLLABORATIVE_WEIGHT
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: collaborative_weight
+        - name: CONTENT_WEIGHT
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: content_weight
+        - name: CACHE_TTL_RECOMMENDATIONS
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: cache_ttl_recommendations
+        - name: CACHE_TTL_TRENDING
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: cache_ttl_trending
+        - name: RATE_LIMIT_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: rate_limit_requests
+        - name: RATE_LIMIT_WINDOW_SECS
+          valueFrom:
+            configMapKeyRef:
+              name: recommendation-engine-config
+              key: rate_limit_window_secs
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always

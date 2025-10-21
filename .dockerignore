@@ -1,0 +1,47 @@
+# Git
+.git/
+.gitignore
+
+# Rust
+target/
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+docs/
+
+# Test files
+tests/
+*_test.rs
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Environment
+.env
+.env.*
+
+# Kubernetes
+k8s/
+helm/
+argocd/
+
+# Temporary files
+tmp/
+temp/
+*.log
+
+# Other
+docker-compose.yml

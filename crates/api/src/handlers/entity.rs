@@ -1,8 +1,8 @@
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use recommendation_models::TenantContext;
 use serde::Deserialize;
@@ -95,11 +95,13 @@ pub async fn get_entity(
         }
         None => {
             info!("Entity not found - entity_id={}", id);
-            Err(recommendation_models::RecommendationError::EntityNotFound(format!(
-                "Entity with id '{}' not found",
-                id
-            ))
-            .into())
+            Err(
+                recommendation_models::RecommendationError::EntityNotFound(format!(
+                    "Entity with id '{}' not found",
+                    id
+                ))
+                .into(),
+            )
         }
     }
 }

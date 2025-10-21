@@ -1,0 +1,18 @@
+apiVersion: v2
+name: recommendation-engine
+description: A high-performance, domain-agnostic recommendation microservice written in Rust
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - recommendations
+  - machine-learning
+  - rust
+  - collaborative-filtering
+  - content-based-filtering
+home: https://github.com/grooveshop/recommendation-engine
+sources:
+  - https://github.com/grooveshop/recommendation-engine
+maintainers:
+  - name: GrooveShop Team
+    email: team@grooveshop.com

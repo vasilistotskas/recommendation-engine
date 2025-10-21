@@ -187,7 +187,7 @@ mod tests {
     fn test_error_serialization() {
         let error = RecommendationError::InvalidRequest("Bad input".to_string());
         let response = error.to_response(Some("req_123".to_string()));
-        
+
         let json = serde_json::to_string(&response).unwrap();
         assert!(json.contains("INVALID_REQUEST"));
         assert!(json.contains("Bad input"));

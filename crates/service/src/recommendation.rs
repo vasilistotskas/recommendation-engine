@@ -1,3 +1,5 @@
+use chrono::Utc;
+use moka::future::Cache;
 use recommendation_engine::{
     CollaborativeFilteringEngine, ContentBasedFilteringEngine, HybridEngine,
 };
@@ -8,8 +10,6 @@ use recommendation_models::{
 use recommendation_storage::{RedisCache, VectorStore};
 use std::sync::Arc;
 use tracing::{debug, info};
-use chrono::Utc;
-use moka::future::Cache;
 
 /// Service for orchestrating recommendation algorithms and handling requests
 pub struct RecommendationService {
@@ -133,7 +133,9 @@ impl RecommendationService {
         if let Ok(Some(cached)) = self.cache.get::<RecommendationResponse>(&cache_key).await {
             debug!("Returning Redis cached recommendation response");
             // Also populate in-memory cache
-            self.request_cache.insert(cache_key.clone(), Arc::new(cached.clone())).await;
+            self.request_cache
+                .insert(cache_key.clone(), Arc::new(cached.clone()))
+                .await;
             return Ok(cached);
         }
 
@@ -185,7 +187,9 @@ impl RecommendationService {
 
         // Cache in both Redis and in-memory (in-memory prevents thundering herd)
         let response_arc = Arc::new(response.clone());
-        self.request_cache.insert(cache_key.clone(), response_arc).await;
+        self.request_cache
+            .insert(cache_key.clone(), response_arc)
+            .await;
 
         let _ = self
             .cache
@@ -249,10 +253,7 @@ impl RecommendationService {
                 .await?;
 
             // Check if user is in cold start
-            let cold_start = self
-                .collaborative
-                .is_cold_start_user(ctx, user_id)
-                .await?;
+            let cold_start = self.collaborative.is_cold_start_user(ctx, user_id).await?;
 
             Ok((recommendations, cold_start, "content_based".to_string()))
         } else {
@@ -279,10 +280,7 @@ impl RecommendationService {
                 .await?;
 
             // Check if user is in cold start
-            let cold_start = self
-                .collaborative
-                .is_cold_start_user(ctx, user_id)
-                .await?;
+            let cold_start = self.collaborative.is_cold_start_user(ctx, user_id).await?;
 
             Ok((recommendations, cold_start, "hybrid".to_string()))
         } else if let Some(entity_id) = &request.entity_id {
@@ -377,11 +375,7 @@ impl RecommendationService {
         // Cache for 1 hour
         let _ = self
             .cache
-            .set(
-                &cache_key,
-                &trending,
-                std::time::Duration::from_secs(3600),
-            )
+            .set(&cache_key, &trending, std::time::Duration::from_secs(3600))
             .await;
 
         info!(
@@ -393,7 +387,6 @@ impl RecommendationService {
         Ok(trending)
     }
 }
-
 
 #[cfg(test)]
 mod tests {

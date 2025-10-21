@@ -1,8 +1,8 @@
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use recommendation_models::{Algorithm, RecommendationRequest, TenantContext};
 use tracing::{debug, error};
@@ -18,7 +18,7 @@ use crate::{
 
 /// Get user recommendations endpoint
 /// GET /api/v1/recommendations/user/:id
-/// 
+///
 /// Query parameters:
 /// - algorithm: "collaborative", "content_based", or "hybrid" (default: "hybrid")
 /// - count: number of recommendations (default: 10, max: 100)
@@ -77,7 +77,7 @@ pub async fn get_user_recommendations(
 
 /// Get similar entities endpoint
 /// GET /api/v1/recommendations/entity/:id
-/// 
+///
 /// Query parameters:
 /// - algorithm: "content_based" or "hybrid" (default: "content_based")
 /// - count: number of recommendations (default: 10, max: 100)
@@ -144,7 +144,7 @@ pub async fn get_similar_entities(
 
 /// Get trending entities endpoint
 /// GET /api/v1/recommendations/trending
-/// 
+///
 /// Query parameters:
 /// - entity_type: optional entity type filter
 /// - count: number of trending entities (default: 10, max: 100)
@@ -169,7 +169,10 @@ pub async fn get_trending_entities(
         .await
     {
         Ok(trending) => {
-            debug!("Successfully retrieved {} trending entities", trending.len());
+            debug!(
+                "Successfully retrieved {} trending entities",
+                trending.len()
+            );
             let response = TrendingEntitiesResponse {
                 count: trending.len(),
                 trending: trending

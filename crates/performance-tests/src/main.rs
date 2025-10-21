@@ -112,15 +112,20 @@ async fn main() -> Result<()> {
     println!("{}", "=".repeat(80).bright_blue());
     println!(
         "{}",
-        "Recommendation Engine Performance Validation".bright_blue().bold()
+        "Recommendation Engine Performance Validation"
+            .bright_blue()
+            .bold()
     );
     println!("{}", "=".repeat(80).bright_blue());
     println!();
 
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert("x-bypass-rate-limit", "true".parse().unwrap());
-    headers.insert("authorization", "Bearer test_api_key_12345".parse().unwrap());
-    
+    headers.insert(
+        "authorization",
+        "Bearer test_api_key_12345".parse().unwrap(),
+    );
+
     let client = Client::builder()
         .timeout(Duration::from_secs(30))
         .default_headers(headers)
@@ -134,14 +139,20 @@ async fn main() -> Result<()> {
 
     // Setup test data
     if !args.skip_setup {
-        println!("{}", format!("Setting up test data ({} entities)...", args.entities).yellow());
+        println!(
+            "{}",
+            format!("Setting up test data ({} entities)...", args.entities).yellow()
+        );
         setup_test_data(&client, &args.url, args.entities).await?;
         println!("{}", "✓ Test data created".green());
         println!();
     }
 
     // Test 1: Response Time (p95 < 200ms)
-    println!("{}", "Test 1: Response Time Validation".bright_cyan().bold());
+    println!(
+        "{}",
+        "Test 1: Response Time Validation".bright_cyan().bold()
+    );
     println!("{}", "-".repeat(80).cyan());
     let latency_result = test_response_time(&client, &args.url).await?;
     println!();
@@ -149,7 +160,8 @@ async fn main() -> Result<()> {
     // Test 2: Throughput (1000 req/s)
     println!("{}", "Test 2: Throughput Validation".bright_cyan().bold());
     println!("{}", "-".repeat(80).cyan());
-    let throughput_result = test_throughput(&client, &args.url, args.concurrency, args.duration).await?;
+    let throughput_result =
+        test_throughput(&client, &args.url, args.concurrency, args.duration).await?;
     println!();
 
     // Test 3: Memory Usage (< 2GB for 100k entities)
@@ -237,7 +249,7 @@ async fn setup_test_data(client: &Client, base_url: &str, entity_count: usize) -
     for user_idx in 0..user_count {
         let client = client.clone();
         let url = format!("{}/api/v1/interactions", base_url);
-        
+
         // Each user interacts with 5-10 random products
         let interaction_count = 5 + (user_idx % 6);
         for _ in 0..interaction_count {
@@ -266,7 +278,7 @@ async fn setup_test_data(client: &Client, base_url: &str, entity_count: usize) -
 
 async fn test_response_time(client: &Client, base_url: &str) -> Result<TestResult> {
     println!("Running latency test (100 requests)...");
-    
+
     let mut histogram = Histogram::<u64>::new(3)?;
     let test_count = 100;
     let user_count = 50;
@@ -370,7 +382,7 @@ async fn test_throughput(
                 let duration = start.elapsed();
 
                 let success = result.is_ok() && result.unwrap().status().is_success();
-                
+
                 let mut m = metrics.lock().await;
                 let _ = m.record_request(duration, success);
                 drop(m);
@@ -449,7 +461,10 @@ async fn test_memory_usage(_base_url: &str, entity_count: usize) -> Result<TestR
     }
 
     if memory_mb == 0.0 {
-        println!("  {}", "Warning: Could not find recommendation engine process".yellow());
+        println!(
+            "  {}",
+            "Warning: Could not find recommendation engine process".yellow()
+        );
         println!("  Skipping memory validation (process may be running in container)");
         return Ok(TestResult {
             name: "Memory Usage".to_string(),
@@ -460,7 +475,10 @@ async fn test_memory_usage(_base_url: &str, entity_count: usize) -> Result<TestR
 
     println!("  Memory usage: {:.2} MB", memory_mb);
     println!("  Entity count: {}", entity_count);
-    println!("  Memory per entity: {:.2} KB", (memory_mb * 1024.0) / entity_count as f64);
+    println!(
+        "  Memory per entity: {:.2} KB",
+        (memory_mb * 1024.0) / entity_count as f64
+    );
 
     let memory_gb = memory_mb / 1024.0;
     let passed = if entity_count >= 100_000 {
@@ -515,15 +533,9 @@ fn print_summary(latency: TestResult, throughput: TestResult, memory: TestResult
     println!("{}", "=".repeat(80).bright_blue());
 
     if all_passed {
-        println!(
-            "{}",
-            "✓ All performance requirements met!".green().bold()
-        );
+        println!("{}", "✓ All performance requirements met!".green().bold());
     } else {
-        println!(
-            "{}",
-            "✗ Some performance requirements not met".red().bold()
-        );
+        println!("{}", "✗ Some performance requirements not met".red().bold());
     }
 
     println!("{}", "=".repeat(80).bright_blue());

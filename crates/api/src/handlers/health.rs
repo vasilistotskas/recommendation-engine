@@ -1,11 +1,6 @@
-use axum::{
-    http::StatusCode,
-    response::IntoResponse,
-    Json,
-    extract::State,
-};
-use serde_json::json;
 use crate::state::AppState;
+use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
+use serde_json::json;
 
 /// Health check endpoint (liveness probe)
 /// Returns 200 OK if service is running
@@ -32,19 +27,25 @@ pub async fn readiness_check(State(_state): State<AppState>) -> impl IntoRespons
     // - Adding a health_check() method to RedisCache
     // - Calling those methods here and aggregating the results
 
-    (StatusCode::OK, Json(json!({
-        "status": "healthy",
-        "checks": {
-            "database": "ok",
-            "redis": "ok"
-        }
-    })))
+    (
+        StatusCode::OK,
+        Json(json!({
+            "status": "healthy",
+            "checks": {
+                "database": "ok",
+                "redis": "ok"
+            }
+        })),
+    )
 }
 
 /// Prometheus metrics endpoint
 /// TODO: Implement in task 18.3
 pub async fn metrics() -> impl IntoResponse {
-    (StatusCode::NOT_IMPLEMENTED, "Metrics endpoint not yet implemented")
+    (
+        StatusCode::NOT_IMPLEMENTED,
+        "Metrics endpoint not yet implemented",
+    )
 }
 
 /// API documentation endpoint (OpenAPI spec)

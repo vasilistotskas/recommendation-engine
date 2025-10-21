@@ -1,11 +1,9 @@
-use recommendation_models::{
-    RecommendationError, Result, ScoredEntity, TenantContext,
-};
+use recommendation_models::{RecommendationError, Result, ScoredEntity, TenantContext};
 use recommendation_storage::RedisCache;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
-use tracing::{debug, info, warn};
 use tokio::sync::Semaphore;
+use tracing::{debug, info, warn};
 
 use crate::collaborative::CollaborativeFilteringEngine;
 use crate::content_based::ContentBasedFilteringEngine;
@@ -42,20 +40,20 @@ impl HybridConfig {
     pub fn validate(&self) -> Result<()> {
         let sum = self.collaborative_weight + self.content_weight;
         const TOLERANCE: f32 = 0.001;
-        
+
         if (sum - 1.0).abs() > TOLERANCE {
             return Err(RecommendationError::InvalidRequest(format!(
                 "Hybrid weights must sum to 1.0, got {} (collaborative: {}, content: {})",
                 sum, self.collaborative_weight, self.content_weight
             )));
         }
-        
+
         if self.collaborative_weight < 0.0 || self.content_weight < 0.0 {
             return Err(RecommendationError::InvalidRequest(
-                "Hybrid weights must be non-negative".to_string()
+                "Hybrid weights must be non-negative".to_string(),
             ));
         }
-        
+
         Ok(())
     }
 }
@@ -108,9 +106,11 @@ impl HybridEngine {
         count: usize,
     ) -> Result<Vec<ScoredEntity>> {
         // Acquire semaphore permit to limit concurrency
-        let _permit = self.concurrency_limit.acquire().await.map_err(|e| {
-            RecommendationError::InternalError(format!("Failed to acquire semaphore: {}", e))
-        })?;
+        let _permit = self
+            .concurrency_limit
+            .acquire()
+            .await
+            .map_err(|_e| RecommendationError::InternalError)?;
 
         debug!(
             "Generating hybrid recommendations for user={}, entity_type={:?}, count={}",
@@ -150,7 +150,10 @@ impl HybridEngine {
         // Handle results
         let (collab_recommendations, collab_cold_start) = collab_result?;
         let content_recommendations = content_result.unwrap_or_else(|e| {
-            warn!("Content-based recommendations failed: {}, using empty results", e);
+            warn!(
+                "Content-based recommendations failed: {}, using empty results",
+                e
+            );
             Vec::new()
         });
 
@@ -163,7 +166,10 @@ impl HybridEngine {
         // If collaborative is in cold start and we have no content recommendations,
         // just return the collaborative results (trending)
         if collab_cold_start && content_recommendations.is_empty() {
-            info!("User {} is in cold start with no content recommendations, returning trending", user_id);
+            info!(
+                "User {} is in cold start with no content recommendations, returning trending",
+                user_id
+            );
             let mut results = collab_recommendations;
             results.truncate(count);
             return Ok(results);
@@ -192,7 +198,11 @@ impl HybridEngine {
         // Cache for 5 minutes
         let _ = self
             .cache
-            .set(&cache_key, &sorted_recommendations, std::time::Duration::from_secs(300))
+            .set(
+                &cache_key,
+                &sorted_recommendations,
+                std::time::Duration::from_secs(300),
+            )
             .await;
 
         info!(
@@ -223,7 +233,7 @@ impl HybridEngine {
 
         // Normalize collaborative scores to [0,1]
         let normalized_collab = Self::normalize_scores(collab_results);
-        
+
         // Normalize content-based scores to [0,1]
         let normalized_content = Self::normalize_scores(content_results);
 
@@ -247,18 +257,13 @@ impl HybridEngine {
         let mut combined: Vec<ScoredEntity> = all_entity_ids
             .into_iter()
             .map(|entity_id| {
-                let collab_score = collab_map
-                    .get(&entity_id)
-                    .map(|e| e.score)
-                    .unwrap_or(0.0);
+                let collab_score = collab_map.get(&entity_id).map(|e| e.score).unwrap_or(0.0);
 
-                let content_score = content_map
-                    .get(&entity_id)
-                    .map(|e| e.score)
-                    .unwrap_or(0.0);
+                let content_score = content_map.get(&entity_id).map(|e| e.score).unwrap_or(0.0);
 
                 // Weighted average
-                let combined_score = (collab_score * collab_weight) + (content_score * content_weight);
+                let combined_score =
+                    (collab_score * collab_weight) + (content_score * content_weight);
 
                 // Get entity_type from either source
                 let entity_type = collab_map
@@ -268,7 +273,10 @@ impl HybridEngine {
                     .unwrap_or_else(|| "unknown".to_string());
 
                 // Create reason explaining the combination
-                let reason = match (collab_map.contains_key(&entity_id), content_map.contains_key(&entity_id)) {
+                let reason = match (
+                    collab_map.contains_key(&entity_id),
+                    content_map.contains_key(&entity_id),
+                ) {
                     (true, true) => Some(format!(
                         "Hybrid: {:.0}% collaborative, {:.0}% content similarity",
                         collab_weight * 100.0,
@@ -362,10 +370,10 @@ impl HybridEngine {
 
         // First pass: ensure we have at least one from each category (up to min_categories)
         let mut remaining: Vec<ScoredEntity> = Vec::new();
-        
+
         for entity in recommendations {
             let type_count = seen_types.get(&entity.entity_type).copied().unwrap_or(0);
-            
+
             // If we haven't reached min_categories yet and this is a new type, prioritize it
             if seen_types.len() < min_categories && type_count == 0 {
                 seen_types.insert(entity.entity_type.clone(), 1);
@@ -378,7 +386,7 @@ impl HybridEngine {
         // Second pass: add remaining items, balancing across categories
         for entity in remaining {
             let type_count = seen_types.get(&entity.entity_type).copied().unwrap_or(0);
-            
+
             // Calculate average count across all types
             let avg_count = if seen_types.is_empty() {
                 0.0
@@ -618,7 +626,7 @@ mod tests {
             },
         ];
         let normalized = HybridEngine::normalize_scores(entities);
-        
+
         // Check that relative order is preserved
         assert!(normalized[0].score > normalized[1].score);
         assert!(normalized[1].score > normalized[2].score);

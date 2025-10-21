@@ -247,7 +247,7 @@ impl CollaborativeFilteringEngine {
             // Try to get entity from all possible entity types
             // This is not optimal but works with current schema
             // In production, consider storing entity_type in interactions table
-            
+
             // If entity_type_filter is specified, only check that type
             if let Some(filter_type) = entity_type_filter {
                 if let Ok(Some(entity)) = self
@@ -287,11 +287,7 @@ impl CollaborativeFilteringEngine {
 
     /// Check if a user is in cold start state (fewer than threshold interactions)
     /// Returns true if user has fewer than 5 interactions or no profile exists
-    pub async fn is_cold_start_user(
-        &self,
-        ctx: &TenantContext,
-        user_id: &str,
-    ) -> Result<bool> {
+    pub async fn is_cold_start_user(&self, ctx: &TenantContext, user_id: &str) -> Result<bool> {
         const COLD_START_THRESHOLD: i32 = 5;
 
         // Check if user profile exists
@@ -327,11 +323,7 @@ impl CollaborativeFilteringEngine {
         );
 
         // Try to get from cache first
-        let cache_key = format!(
-            "trending:{}:{}",
-            entity_type.unwrap_or("all"),
-            count
-        );
+        let cache_key = format!("trending:{}:{}", entity_type.unwrap_or("all"), count);
 
         if let Ok(Some(cached)) = self.cache.get::<Vec<ScoredEntity>>(&cache_key).await {
             debug!("Returning cached trending entities");
@@ -355,7 +347,10 @@ impl CollaborativeFilteringEngine {
             .collect();
 
         // Normalize scores to [0, 1] range
-        if let Some(max_score) = trending.iter().map(|e| e.score).max_by(|a, b| a.partial_cmp(b).unwrap())
+        if let Some(max_score) = trending
+            .iter()
+            .map(|e| e.score)
+            .max_by(|a, b| a.partial_cmp(b).unwrap())
             && max_score > 0.0
         {
             for entity in &mut trending {
@@ -437,8 +432,6 @@ impl CollaborativeFilteringEngine {
         Ok((recommendations, false))
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

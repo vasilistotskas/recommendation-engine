@@ -1,9 +1,7 @@
-use recommendation_models::{
-    RegisteredInteractionType, TenantContext, Result,
-};
+use recommendation_models::{RegisteredInteractionType, Result, TenantContext};
 use recommendation_storage::VectorStore;
 use std::sync::Arc;
-use tracing::{info, debug};
+use tracing::{debug, info};
 
 /// Service for managing custom interaction types
 pub struct InteractionTypeService {
@@ -29,7 +27,8 @@ impl InteractionTypeService {
             ctx.tenant_id, interaction_type, weight
         );
 
-        let registered = self.vector_store
+        let registered = self
+            .vector_store
             .register_interaction_type(ctx, &interaction_type, weight, description)
             .await?;
 
@@ -67,9 +66,7 @@ impl InteractionTypeService {
             ctx.tenant_id
         );
 
-        self.vector_store
-            .list_interaction_types(ctx)
-            .await
+        self.vector_store.list_interaction_types(ctx).await
     }
 
     /// Update an existing interaction type
@@ -85,7 +82,8 @@ impl InteractionTypeService {
             ctx.tenant_id, interaction_type, weight
         );
 
-        let updated = self.vector_store
+        let updated = self
+            .vector_store
             .update_interaction_type(ctx, &interaction_type, weight, description)
             .await?;
 

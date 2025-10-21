@@ -1,14 +1,14 @@
 #![allow(clippy::type_complexity)]
 #![allow(clippy::too_many_arguments)]
 
-use recommendation_models::{
-    Entity, AttributeValue, Interaction, InteractionType, UserProfile, 
-    TenantContext, RecommendationError, Result,
-};
-use sqlx::{PgPool, QueryBuilder, Postgres, Row};
-use std::collections::HashMap;
 use chrono::{DateTime, Utc};
-use tracing::{info, debug, warn};
+use recommendation_models::{
+    AttributeValue, Entity, Interaction, InteractionType, RecommendationError, Result,
+    TenantContext, UserProfile,
+};
+use sqlx::{PgPool, Postgres, QueryBuilder, Row};
+use std::collections::HashMap;
+use tracing::{debug, info, warn};
 
 /// Vector store for entity CRUD operations and similarity search
 pub struct VectorStore {
@@ -36,12 +36,19 @@ impl VectorStore {
         );
 
         // Convert attributes to JSONB
-        let attributes_json = serde_json::to_value(&attributes)
-            .map_err(|e| RecommendationError::VectorError(format!("Failed to serialize attributes: {}", e)))?;
+        let attributes_json = serde_json::to_value(&attributes).map_err(|e| {
+            RecommendationError::VectorError(format!("Failed to serialize attributes: {}", e))
+        })?;
 
         // Convert feature vector to pgvector format
         let vector_str = feature_vector.as_ref().map(|v| {
-            format!("[{}]", v.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(","))
+            format!(
+                "[{}]",
+                v.iter()
+                    .map(|f| f.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            )
         });
 
         let now = Utc::now();
@@ -90,8 +97,9 @@ impl VectorStore {
         Ok(Entity {
             entity_id: result.0,
             entity_type: result.1,
-            attributes: serde_json::from_value(result.3)
-                .map_err(|e| RecommendationError::VectorError(format!("Failed to deserialize attributes: {}", e)))?,
+            attributes: serde_json::from_value(result.3).map_err(|e| {
+                RecommendationError::VectorError(format!("Failed to deserialize attributes: {}", e))
+            })?,
             feature_vector,
             tenant_id: Some(result.2),
             created_at: result.4,
@@ -129,12 +137,16 @@ impl VectorStore {
         match result {
             Some(row) => {
                 let feature_vector = row.feature_vector_text.as_deref().and_then(parse_vector);
-                
+
                 Ok(Some(Entity {
                     entity_id: row.entity_id,
                     entity_type: row.entity_type,
-                    attributes: serde_json::from_value(row.attributes)
-                        .map_err(|e| RecommendationError::VectorError(format!("Failed to deserialize attributes: {}", e)))?,
+                    attributes: serde_json::from_value(row.attributes).map_err(|e| {
+                        RecommendationError::VectorError(format!(
+                            "Failed to deserialize attributes: {}",
+                            e
+                        ))
+                    })?,
                     feature_vector,
                     tenant_id: Some(row.tenant_id),
                     created_at: row.created_at,
@@ -159,11 +171,18 @@ impl VectorStore {
             ctx.tenant_id, entity_id, entity_type
         );
 
-        let attributes_json = serde_json::to_value(&attributes)
-            .map_err(|e| RecommendationError::VectorError(format!("Failed to serialize attributes: {}", e)))?;
+        let attributes_json = serde_json::to_value(&attributes).map_err(|e| {
+            RecommendationError::VectorError(format!("Failed to serialize attributes: {}", e))
+        })?;
 
         let vector_str = feature_vector.as_ref().map(|v| {
-            format!("[{}]", v.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(","))
+            format!(
+                "[{}]",
+                v.iter()
+                    .map(|f| f.to_string())
+                    .collect::<Vec<_>>()
+                    .join(",")
+            )
         });
 
         let now = Utc::now();
@@ -174,7 +193,7 @@ impl VectorStore {
             SET attributes = $1, feature_vector = $2::vector, updated_at = $3
             WHERE tenant_id = $4 AND entity_id = $5 AND entity_type = $6
             RETURNING entity_id, entity_type, tenant_id, attributes, created_at, updated_at
-            "#
+            "#,
         )
         .bind(&attributes_json)
         .bind(vector_str)
@@ -195,8 +214,14 @@ impl VectorStore {
                 Ok(Entity {
                     entity_id: row.try_get("entity_id")?,
                     entity_type: row.try_get("entity_type")?,
-                    attributes: serde_json::from_value(row.try_get("attributes")?)
-                        .map_err(|e| RecommendationError::VectorError(format!("Failed to deserialize attributes: {}", e)))?,
+                    attributes: serde_json::from_value(row.try_get("attributes")?).map_err(
+                        |e| {
+                            RecommendationError::VectorError(format!(
+                                "Failed to deserialize attributes: {}",
+                                e
+                            ))
+                        },
+                    )?,
                     feature_vector,
                     tenant_id: Some(row.try_get("tenant_id")?),
                     created_at: row.try_get("created_at")?,
@@ -232,8 +257,7 @@ impl VectorStore {
             entity_type
         )
         .execute(&self.pool)
-        .await
-        ?;
+        .await?;
 
         if result.rows_affected() == 0 {
             return Err(RecommendationError::EntityNotFound(format!(
@@ -267,7 +291,11 @@ impl VectorStore {
 
         let vector_str = format!(
             "[{}]",
-            feature_vector.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(",")
+            feature_vector
+                .iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>()
+                .join(",")
         );
 
         let results = if let Some(exclude_id) = exclude_entity_id {
@@ -285,7 +313,7 @@ impl VectorStore {
                   AND 1 - (feature_vector <=> $1::vector) >= $5
                 ORDER BY feature_vector <=> $1::vector
                 LIMIT $6
-                "#
+                "#,
             )
             .bind(&vector_str)
             .bind(&ctx.tenant_id)
@@ -309,7 +337,7 @@ impl VectorStore {
                   AND 1 - (feature_vector <=> $1::vector) >= $4
                 ORDER BY feature_vector <=> $1::vector
                 LIMIT $5
-                "#
+                "#,
             )
             .bind(&vector_str)
             .bind(&ctx.tenant_id)
@@ -323,7 +351,8 @@ impl VectorStore {
         let entities: Vec<(Entity, f32)> = results
             .into_iter()
             .filter_map(|row| {
-                let feature_vector_text: Option<String> = row.try_get("feature_vector_text").ok()?;
+                let feature_vector_text: Option<String> =
+                    row.try_get("feature_vector_text").ok()?;
                 let feature_vector = feature_vector_text.as_deref().and_then(parse_vector);
                 let similarity: Option<f64> = row.try_get("similarity").ok()?;
                 let similarity = similarity.unwrap_or(0.0) as f32;
@@ -364,7 +393,12 @@ impl VectorStore {
     pub async fn batch_insert_entities(
         &self,
         ctx: &TenantContext,
-        entities: Vec<(String, String, HashMap<String, AttributeValue>, Option<Vec<f32>>)>,
+        entities: Vec<(
+            String,
+            String,
+            HashMap<String, AttributeValue>,
+            Option<Vec<f32>>,
+        )>,
     ) -> Result<usize> {
         if entities.is_empty() {
             return Ok(0);
@@ -377,31 +411,37 @@ impl VectorStore {
         );
 
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            "INSERT INTO entities (tenant_id, entity_id, entity_type, attributes, feature_vector, created_at, updated_at) "
+            "INSERT INTO entities (tenant_id, entity_id, entity_type, attributes, feature_vector, created_at, updated_at) ",
         );
 
         let now = Utc::now();
 
-        query_builder.push_values(entities, |mut b, (entity_id, entity_type, attributes, feature_vector)| {
-            let attributes_json = serde_json::to_value(&attributes).unwrap_or(serde_json::json!({}));
-            let vector_str = feature_vector.as_ref().map(|v| {
-                format!("[{}]", v.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(","))
-            });
+        query_builder.push_values(
+            entities,
+            |mut b, (entity_id, entity_type, attributes, feature_vector)| {
+                let attributes_json =
+                    serde_json::to_value(&attributes).unwrap_or(serde_json::json!({}));
+                let vector_str = feature_vector.as_ref().map(|v| {
+                    format!(
+                        "[{}]",
+                        v.iter()
+                            .map(|f| f.to_string())
+                            .collect::<Vec<_>>()
+                            .join(",")
+                    )
+                });
 
-            b.push_bind(&ctx.tenant_id)
-                .push_bind(entity_id)
-                .push_bind(entity_type)
-                .push_bind(attributes_json)
-                .push_bind(vector_str)
-                .push_bind(now)
-                .push_bind(now);
-        });
+                b.push_bind(&ctx.tenant_id)
+                    .push_bind(entity_id)
+                    .push_bind(entity_type)
+                    .push_bind(attributes_json)
+                    .push_bind(vector_str)
+                    .push_bind(now)
+                    .push_bind(now);
+            },
+        );
 
-        let result = query_builder
-            .build()
-            .execute(&self.pool)
-            .await
-            ?;
+        let result = query_builder.build().execute(&self.pool).await?;
 
         let inserted = result.rows_affected() as usize;
 
@@ -417,7 +457,12 @@ impl VectorStore {
     pub async fn batch_update_entities(
         &self,
         ctx: &TenantContext,
-        updates: Vec<(String, String, HashMap<String, AttributeValue>, Option<Vec<f32>>)>,
+        updates: Vec<(
+            String,
+            String,
+            HashMap<String, AttributeValue>,
+            Option<Vec<f32>>,
+        )>,
     ) -> Result<usize> {
         if updates.is_empty() {
             return Ok(0);
@@ -436,11 +481,18 @@ impl VectorStore {
         let mut tx = self.pool.begin().await?;
 
         for (entity_id, entity_type, attributes, feature_vector) in updates {
-            let attributes_json = serde_json::to_value(&attributes)
-                .map_err(|e| RecommendationError::VectorError(format!("Failed to serialize attributes: {}", e)))?;
+            let attributes_json = serde_json::to_value(&attributes).map_err(|e| {
+                RecommendationError::VectorError(format!("Failed to serialize attributes: {}", e))
+            })?;
 
             let vector_str = feature_vector.as_ref().map(|v| {
-                format!("[{}]", v.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(","))
+                format!(
+                    "[{}]",
+                    v.iter()
+                        .map(|f| f.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                )
             });
 
             let result = sqlx::query(
@@ -448,7 +500,7 @@ impl VectorStore {
                 UPDATE entities
                 SET attributes = $1, feature_vector = $2::vector, updated_at = $3
                 WHERE tenant_id = $4 AND entity_id = $5 AND entity_type = $6
-                "#
+                "#,
             )
             .bind(&attributes_json)
             .bind(vector_str)
@@ -507,10 +559,7 @@ mod tests {
 
     #[test]
     fn test_parse_vector_multiple() {
-        assert_eq!(
-            parse_vector("[0.1,0.2,0.3]"),
-            Some(vec![0.1, 0.2, 0.3])
-        );
+        assert_eq!(parse_vector("[0.1,0.2,0.3]"), Some(vec![0.1, 0.2, 0.3]));
     }
 
     #[test]
@@ -715,7 +764,15 @@ impl VectorStore {
     pub async fn bulk_import_interactions(
         &self,
         ctx: &TenantContext,
-        interactions: Vec<(String, String, String, InteractionType, f32, Option<HashMap<String, String>>, DateTime<Utc>)>,
+        interactions: Vec<(
+            String,
+            String,
+            String,
+            InteractionType,
+            f32,
+            Option<HashMap<String, String>>,
+            DateTime<Utc>,
+        )>,
     ) -> Result<usize> {
         if interactions.is_empty() {
             return Ok(0);
@@ -728,7 +785,7 @@ impl VectorStore {
         );
 
         let mut query_builder: QueryBuilder<Postgres> = QueryBuilder::new(
-            "INSERT INTO interactions (tenant_id, user_id, entity_id, entity_type, interaction_type, weight, metadata, timestamp) "
+            "INSERT INTO interactions (tenant_id, user_id, entity_id, entity_type, interaction_type, weight, metadata, timestamp) ",
         );
 
         query_builder.push_values(
@@ -756,12 +813,11 @@ impl VectorStore {
             },
         );
 
-        query_builder.push(" ON CONFLICT (tenant_id, user_id, entity_id, interaction_type, timestamp) DO NOTHING");
+        query_builder.push(
+            " ON CONFLICT (tenant_id, user_id, entity_id, interaction_type, timestamp) DO NOTHING",
+        );
 
-        let result = query_builder
-            .build()
-            .execute(&self.pool)
-            .await?;
+        let result = query_builder.build().execute(&self.pool).await?;
 
         let imported = result.rows_affected() as usize;
 
@@ -789,8 +845,7 @@ impl VectorStore {
             user_id
         )
         .fetch_one(&self.pool)
-        .await
-        ?;
+        .await?;
 
         Ok(result.count.unwrap_or(0) as i32)
     }
@@ -811,8 +866,7 @@ impl VectorStore {
             user_id
         )
         .fetch_all(&self.pool)
-        .await
-        ?;
+        .await?;
 
         Ok(results.into_iter().map(|row| row.entity_id).collect())
     }
@@ -826,7 +880,8 @@ fn parse_interaction_type(s: &str) -> InteractionType {
         "purchase" => InteractionType::Purchase,
         "like" => InteractionType::Like,
         s if s.starts_with("rating_") => {
-            let rating = s.strip_prefix("rating_")
+            let rating = s
+                .strip_prefix("rating_")
                 .and_then(|r| r.parse::<f32>().ok())
                 .unwrap_or(0.0);
             InteractionType::Rating(rating)
@@ -856,7 +911,11 @@ impl VectorStore {
 
         let vector_str = format!(
             "[{}]",
-            preference_vector.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(",")
+            preference_vector
+                .iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>()
+                .join(",")
         );
 
         let now = Utc::now();
@@ -927,13 +986,13 @@ impl VectorStore {
             user_id
         )
         .fetch_optional(&self.pool)
-        .await
-        ?;
+        .await?;
 
         match result {
             Some(row) => Ok(Some(UserProfile {
                 user_id: row.user_id,
-                preference_vector: row.preference_vector_text
+                preference_vector: row
+                    .preference_vector_text
                     .as_deref()
                     .and_then(parse_vector)
                     .unwrap_or_default(),
@@ -948,11 +1007,7 @@ impl VectorStore {
     }
 
     /// Delete a user profile
-    pub async fn delete_user_profile(
-        &self,
-        ctx: &TenantContext,
-        user_id: &str,
-    ) -> Result<()> {
+    pub async fn delete_user_profile(&self, ctx: &TenantContext, user_id: &str) -> Result<()> {
         debug!(
             "Deleting user profile: tenant={}, user={}",
             ctx.tenant_id, user_id
@@ -967,8 +1022,7 @@ impl VectorStore {
             user_id
         )
         .execute(&self.pool)
-        .await
-        ?;
+        .await?;
 
         if result.rows_affected() == 0 {
             warn!(
@@ -1014,8 +1068,7 @@ impl VectorStore {
             user_id
         )
         .fetch_all(&self.pool)
-        .await
-        ?;
+        .await?;
 
         if results.is_empty() {
             debug!(
@@ -1031,25 +1084,26 @@ impl VectorStore {
 
         for row in results {
             if let Some(vector_text) = &row.feature_vector_text
-                && let Some(vector) = parse_vector(vector_text.as_str()) {
-                    let weight = row.weight as f32;
-                    total_weight += weight;
+                && let Some(vector) = parse_vector(vector_text.as_str())
+            {
+                let weight = row.weight as f32;
+                total_weight += weight;
 
-                    match &mut aggregated_vector {
-                        Some(agg) => {
-                            // Add weighted vector to aggregated vector
-                            for (i, val) in vector.iter().enumerate() {
-                                if i < agg.len() {
-                                    agg[i] += val * weight;
-                                }
+                match &mut aggregated_vector {
+                    Some(agg) => {
+                        // Add weighted vector to aggregated vector
+                        for (i, val) in vector.iter().enumerate() {
+                            if i < agg.len() {
+                                agg[i] += val * weight;
                             }
                         }
-                        None => {
-                            // Initialize aggregated vector
-                            aggregated_vector = Some(vector.iter().map(|v| v * weight).collect());
-                        }
+                    }
+                    None => {
+                        // Initialize aggregated vector
+                        aggregated_vector = Some(vector.iter().map(|v| v * weight).collect());
                     }
                 }
+            }
         }
 
         // Normalize by total weight
@@ -1088,7 +1142,11 @@ impl VectorStore {
 
         let vector_str = format!(
             "[{}]",
-            preference_vector.iter().map(|f| f.to_string()).collect::<Vec<_>>().join(",")
+            preference_vector
+                .iter()
+                .map(|f| f.to_string())
+                .collect::<Vec<_>>()
+                .join(",")
         );
 
         let results = if let Some(exclude_id) = exclude_user_id {
@@ -1103,7 +1161,7 @@ impl VectorStore {
                   AND preference_vector IS NOT NULL
                 ORDER BY preference_vector <=> $1::vector
                 LIMIT $4
-                "#
+                "#,
             )
             .bind(&vector_str)
             .bind(&ctx.tenant_id)
@@ -1122,7 +1180,7 @@ impl VectorStore {
                   AND preference_vector IS NOT NULL
                 ORDER BY preference_vector <=> $1::vector
                 LIMIT $3
-                "#
+                "#,
             )
             .bind(&vector_str)
             .bind(&ctx.tenant_id)
@@ -1134,7 +1192,8 @@ impl VectorStore {
         let users: Vec<(UserProfile, f32)> = results
             .into_iter()
             .filter_map(|row| {
-                let preference_vector_text: Option<String> = row.try_get("preference_vector_text").ok()?;
+                let preference_vector_text: Option<String> =
+                    row.try_get("preference_vector_text").ok()?;
                 let preference_vector = preference_vector_text
                     .as_deref()
                     .and_then(parse_vector)
@@ -1192,14 +1251,14 @@ impl VectorStore {
             limit as i64
         )
         .fetch_all(&self.pool)
-        .await
-        ?;
+        .await?;
 
         let users: Vec<UserProfile> = results
             .into_iter()
             .map(|row| UserProfile {
                 user_id: row.user_id,
-                preference_vector: row.preference_vector_text
+                preference_vector: row
+                    .preference_vector_text
                     .as_deref()
                     .and_then(parse_vector)
                     .unwrap_or_default(),
@@ -1247,7 +1306,7 @@ impl VectorStore {
                 GROUP BY i.entity_id, i.entity_type
                 ORDER BY total_weight DESC
                 LIMIT $4
-                "#
+                "#,
             )
             .bind(&ctx.tenant_id)
             .bind(etype)
@@ -1265,7 +1324,7 @@ impl VectorStore {
                 GROUP BY i.entity_id, i.entity_type
                 ORDER BY total_weight DESC
                 LIMIT $3
-                "#
+                "#,
             )
             .bind(&ctx.tenant_id)
             .bind(seven_days_ago)
@@ -1277,11 +1336,7 @@ impl VectorStore {
         let stats: Vec<(String, String, f32)> = results
             .into_iter()
             .map(|(entity_id, entity_type, total_weight)| {
-                (
-                    entity_id,
-                    entity_type,
-                    total_weight.unwrap_or(0.0) as f32,
-                )
+                (entity_id, entity_type, total_weight.unwrap_or(0.0) as f32)
             })
             .collect();
 
@@ -1323,10 +1378,7 @@ impl Default for HnswIndexConfig {
 impl VectorStore {
     /// Create HNSW index for entity feature vectors
     /// Note: This is typically done via migrations, but can be called manually if needed
-    pub async fn create_entity_vector_index(
-        &self,
-        config: Option<HnswIndexConfig>,
-    ) -> Result<()> {
+    pub async fn create_entity_vector_index(&self, config: Option<HnswIndexConfig>) -> Result<()> {
         let config = config.unwrap_or_default();
 
         info!(
@@ -1352,10 +1404,7 @@ impl VectorStore {
 
     /// Create HNSW index for user preference vectors
     /// Note: This is typically done via migrations, but can be called manually if needed
-    pub async fn create_user_vector_index(
-        &self,
-        config: Option<HnswIndexConfig>,
-    ) -> Result<()> {
+    pub async fn create_user_vector_index(&self, config: Option<HnswIndexConfig>) -> Result<()> {
         let config = config.unwrap_or_default();
 
         info!(
@@ -1381,10 +1430,7 @@ impl VectorStore {
 
     /// Rebuild HNSW index for entity feature vectors
     /// This can be useful after bulk imports or when index performance degrades
-    pub async fn rebuild_entity_vector_index(
-        &self,
-        config: Option<HnswIndexConfig>,
-    ) -> Result<()> {
+    pub async fn rebuild_entity_vector_index(&self, config: Option<HnswIndexConfig>) -> Result<()> {
         info!("Rebuilding HNSW index for entity feature vectors");
 
         // Drop existing index
@@ -1402,10 +1448,7 @@ impl VectorStore {
 
     /// Rebuild HNSW index for user preference vectors
     /// This can be useful after bulk profile updates or when index performance degrades
-    pub async fn rebuild_user_vector_index(
-        &self,
-        config: Option<HnswIndexConfig>,
-    ) -> Result<()> {
+    pub async fn rebuild_user_vector_index(&self, config: Option<HnswIndexConfig>) -> Result<()> {
         info!("Rebuilding HNSW index for user preference vectors");
 
         // Drop existing index
@@ -1434,8 +1477,7 @@ impl VectorStore {
             "#
         )
         .fetch_one(&self.pool)
-        .await
-        ?
+        .await?
         .count
         .unwrap_or(0) as usize;
 
@@ -1448,8 +1490,7 @@ impl VectorStore {
             "#
         )
         .fetch_one(&self.pool)
-        .await
-        ?
+        .await?
         .count
         .unwrap_or(0) as usize;
 
@@ -1461,8 +1502,7 @@ impl VectorStore {
             "#
         )
         .fetch_one(&self.pool)
-        .await
-        ?
+        .await?
         .count
         .unwrap_or(0) as usize;
 
@@ -1489,8 +1529,7 @@ impl VectorStore {
             "#
         )
         .fetch_one(&self.pool)
-        .await
-        ?
+        .await?
         .exists
         .unwrap_or(false);
 
@@ -1503,19 +1542,22 @@ impl VectorStore {
             "#
         )
         .fetch_one(&self.pool)
-        .await
-        ?
+        .await?
         .exists
         .unwrap_or(false);
 
         let mut recommendations = Vec::new();
 
         if !entity_index_exists && stats.entity_count > 0 {
-            recommendations.push("Entity vector index is missing. Create it for better performance.".to_string());
+            recommendations.push(
+                "Entity vector index is missing. Create it for better performance.".to_string(),
+            );
         }
 
         if !user_index_exists && stats.user_count > 0 {
-            recommendations.push("User vector index is missing. Create it for better performance.".to_string());
+            recommendations.push(
+                "User vector index is missing. Create it for better performance.".to_string(),
+            );
         }
 
         if stats.entity_count > 100_000 {
@@ -1552,9 +1594,6 @@ pub struct IndexPerformanceReport {
     pub recommendations: Vec<String>,
 }
 
-
-
-
 // Methods for Model Updater
 impl VectorStore {
     /// Get users with interactions in the last specified duration
@@ -1564,7 +1603,7 @@ impl VectorStore {
         duration: std::time::Duration,
     ) -> Result<Vec<String>> {
         let seconds_ago = duration.as_secs() as i64;
-        
+
         let rows = sqlx::query(
             r#"
             SELECT DISTINCT user_id
@@ -1572,7 +1611,7 @@ impl VectorStore {
             WHERE tenant_id = $1
               AND timestamp > NOW() - INTERVAL '1 second' * $2
             ORDER BY user_id
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .bind(seconds_ago)
@@ -1594,7 +1633,7 @@ impl VectorStore {
         duration: std::time::Duration,
     ) -> Result<Vec<String>> {
         let seconds_ago = duration.as_secs() as i64;
-        
+
         let rows = sqlx::query(
             r#"
             SELECT entity_id
@@ -1602,7 +1641,7 @@ impl VectorStore {
             WHERE tenant_id = $1
               AND updated_at > NOW() - INTERVAL '1 second' * $2
             ORDER BY entity_id
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .bind(seconds_ago)
@@ -1634,7 +1673,14 @@ impl VectorStore {
         let last_interaction_at = interactions.first().map(|i| i.timestamp);
 
         // Update the user profile
-        self.upsert_user_profile(ctx, user_id, preference_vector, interaction_count, last_interaction_at).await?;
+        self.upsert_user_profile(
+            ctx,
+            user_id,
+            preference_vector,
+            interaction_count,
+            last_interaction_at,
+        )
+        .await?;
 
         Ok(())
     }
@@ -1647,7 +1693,7 @@ impl VectorStore {
     ) -> Result<()> {
         // Get all entity types to try finding the entity
         let entity_types = self.get_all_entity_types(ctx).await?;
-        
+
         // Try to find the entity by checking each type
         let mut found = false;
         for entity_type in entity_types {
@@ -1669,7 +1715,7 @@ impl VectorStore {
             UPDATE entities
             SET updated_at = NOW()
             WHERE tenant_id = $1 AND entity_id = $2
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .bind(entity_id)
@@ -1687,7 +1733,7 @@ impl VectorStore {
             FROM user_profiles
             WHERE tenant_id = $1
             ORDER BY user_id
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .fetch_all(&self.pool)
@@ -1709,7 +1755,7 @@ impl VectorStore {
             FROM entities
             WHERE tenant_id = $1
             ORDER BY entity_id
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .fetch_all(&self.pool)
@@ -1723,8 +1769,6 @@ impl VectorStore {
         Ok(entity_ids)
     }
 
-
-
     /// Get all entity types for a tenant
     pub async fn get_all_entity_types(&self, ctx: &TenantContext) -> Result<Vec<String>> {
         let rows = sqlx::query(
@@ -1733,7 +1777,7 @@ impl VectorStore {
             FROM entities
             WHERE tenant_id = $1
             ORDER BY entity_type
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .fetch_all(&self.pool)
@@ -1787,7 +1831,7 @@ impl VectorStore {
                 .await?
             }
         } else if let Some(timestamp) = last_modified_after {
-                sqlx::query(
+            sqlx::query(
                     r#"
                     SELECT entity_id, entity_type, attributes, feature_vector::text as feature_vector_text, tenant_id, created_at, updated_at
                     FROM entities
@@ -1827,8 +1871,9 @@ impl VectorStore {
             let updated_at: DateTime<Utc> = row.try_get("updated_at")?;
 
             // Parse attributes JSON to HashMap
-            let attributes_map = serde_json::from_value::<HashMap<String, AttributeValue>>(attributes)
-                .unwrap_or_default();
+            let attributes_map =
+                serde_json::from_value::<HashMap<String, AttributeValue>>(attributes)
+                    .unwrap_or_default();
 
             entities.push(Entity {
                 entity_id,
@@ -1926,13 +1971,13 @@ impl VectorStore {
             let timestamp: DateTime<Utc> = row.try_get("timestamp")?;
 
             // Parse interaction type
-            let interaction_type = serde_json::from_str::<InteractionType>(&format!("\"{}\"", interaction_type_str))
-                .unwrap_or(InteractionType::View);
+            let interaction_type =
+                serde_json::from_str::<InteractionType>(&format!("\"{}\"", interaction_type_str))
+                    .unwrap_or(InteractionType::View);
 
             // Parse metadata
-            let metadata_map = metadata.and_then(|v| {
-                serde_json::from_value::<HashMap<String, String>>(v).ok()
-            });
+            let metadata_map =
+                metadata.and_then(|v| serde_json::from_value::<HashMap<String, String>>(v).ok());
 
             interactions.push(Interaction {
                 id,
@@ -2036,9 +2081,10 @@ impl VectorStore {
 
         // Validate weight is positive
         if weight < 0.0 {
-            return Err(RecommendationError::InvalidRequest(
-                format!("Interaction weight must be non-negative, got {}", weight)
-            ));
+            return Err(RecommendationError::InvalidRequest(format!(
+                "Interaction weight must be non-negative, got {}",
+                weight
+            )));
         }
 
         let now = Utc::now();
@@ -2096,7 +2142,7 @@ impl VectorStore {
             SELECT id, tenant_id, interaction_type, weight, description, created_at, updated_at
             FROM interaction_types
             WHERE tenant_id = $1 AND interaction_type = $2
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .bind(interaction_type)
@@ -2122,10 +2168,7 @@ impl VectorStore {
         &self,
         ctx: &TenantContext,
     ) -> Result<Vec<RegisteredInteractionType>> {
-        debug!(
-            "Listing interaction types: tenant={}",
-            ctx.tenant_id
-        );
+        debug!("Listing interaction types: tenant={}", ctx.tenant_id);
 
         let results = sqlx::query(
             r#"
@@ -2133,7 +2176,7 @@ impl VectorStore {
             FROM interaction_types
             WHERE tenant_id = $1
             ORDER BY interaction_type ASC
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .fetch_all(&self.pool)
@@ -2178,9 +2221,10 @@ impl VectorStore {
 
         // Validate weight is positive
         if weight < 0.0 {
-            return Err(RecommendationError::InvalidRequest(
-                format!("Interaction weight must be non-negative, got {}", weight)
-            ));
+            return Err(RecommendationError::InvalidRequest(format!(
+                "Interaction weight must be non-negative, got {}",
+                weight
+            )));
         }
 
         let now = Utc::now();
@@ -2191,7 +2235,7 @@ impl VectorStore {
             SET weight = $1, description = $2, updated_at = $3
             WHERE tenant_id = $4 AND interaction_type = $5
             RETURNING id, tenant_id, interaction_type, weight, description, created_at, updated_at
-            "#
+            "#,
         )
         .bind(weight)
         .bind(&description)
@@ -2240,7 +2284,7 @@ impl VectorStore {
             r#"
             DELETE FROM interaction_types
             WHERE tenant_id = $1 AND interaction_type = $2
-            "#
+            "#,
         )
         .bind(&ctx.tenant_id)
         .bind(interaction_type)

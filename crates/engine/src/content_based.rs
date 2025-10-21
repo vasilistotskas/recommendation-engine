@@ -1,6 +1,4 @@
-use recommendation_models::{
-    RecommendationError, Result, ScoredEntity, TenantContext, Entity,
-};
+use recommendation_models::{Entity, RecommendationError, Result, ScoredEntity, TenantContext};
 use recommendation_storage::{RedisCache, VectorStore};
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -77,10 +75,7 @@ impl ContentBasedFilteringEngine {
 
         // Check if entity has a feature vector
         let feature_vector = entity.feature_vector.as_ref().ok_or_else(|| {
-            RecommendationError::VectorError(format!(
-                "Entity {} has no feature vector",
-                entity_id
-            ))
+            RecommendationError::VectorError(format!("Entity {} has no feature vector", entity_id))
         })?;
 
         // Find similar entities using pgvector
@@ -153,7 +148,11 @@ impl ContentBasedFilteringEngine {
         // Cache for 5 minutes
         let _ = self
             .cache
-            .set(&cache_key, &recommendations, std::time::Duration::from_secs(300))
+            .set(
+                &cache_key,
+                &recommendations,
+                std::time::Duration::from_secs(300),
+            )
             .await;
 
         info!(
@@ -201,7 +200,8 @@ impl ContentBasedFilteringEngine {
         let interacted_set: HashSet<String> = interacted_entities.into_iter().collect();
 
         // Aggregate similar entities from all interacted entities
-        let mut entity_scores: std::collections::HashMap<String, f32> = std::collections::HashMap::new();
+        let mut entity_scores: std::collections::HashMap<String, f32> =
+            std::collections::HashMap::new();
 
         for interaction in interactions {
             // Skip if not the right entity type
@@ -285,7 +285,8 @@ impl ContentBasedFilteringEngine {
         }
 
         // Find entities similar to trending ones
-        let mut entity_scores: std::collections::HashMap<String, f32> = std::collections::HashMap::new();
+        let mut entity_scores: std::collections::HashMap<String, f32> =
+            std::collections::HashMap::new();
         let mut seen_entities: HashSet<String> = HashSet::new();
 
         for (trending_entity_id, _, popularity_score) in trending {
@@ -359,9 +360,7 @@ impl ContentBasedFilteringEngine {
             .generate_recommendations(ctx, entity_id, entity_type, count)
             .await
         {
-            Ok(recommendations) if !recommendations.is_empty() => {
-                Ok((recommendations, false))
-            }
+            Ok(recommendations) if !recommendations.is_empty() => Ok((recommendations, false)),
             Ok(_) | Err(_) => {
                 // Entity is new or has no similar entities, use cold start
                 info!(

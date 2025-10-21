@@ -88,7 +88,10 @@ mod tests {
         let request: RegisterInteractionTypeRequest = serde_json::from_str(json).unwrap();
         assert_eq!(request.interaction_type, "download");
         assert_eq!(request.weight, 4.0);
-        assert_eq!(request.description, Some("User downloaded entity".to_string()));
+        assert_eq!(
+            request.description,
+            Some("User downloaded entity".to_string())
+        );
         assert_eq!(request.tenant_id, None);
     }
 
@@ -106,17 +109,15 @@ mod tests {
     #[test]
     fn test_list_interaction_types_response() {
         let response = ListInteractionTypesResponse {
-            interaction_types: vec![
-                RegisteredInteractionType {
-                    id: Some(1),
-                    tenant_id: "default".to_string(),
-                    interaction_type: "view".to_string(),
-                    weight: 1.0,
-                    description: None,
-                    created_at: Utc::now(),
-                    updated_at: Utc::now(),
-                },
-            ],
+            interaction_types: vec![RegisteredInteractionType {
+                id: Some(1),
+                tenant_id: "default".to_string(),
+                interaction_type: "view".to_string(),
+                weight: 1.0,
+                description: None,
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
+            }],
             total: 1,
         };
 

@@ -1,0 +1,73 @@
+# Development environment values
+
+# Reduced replicas for development
+replicaCount: 1
+
+# Image configuration
+image:
+  repository: grooveshop/recommendation-engine
+  pullPolicy: IfNotPresent
+  tag: "dev"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+  hosts:
+    - host: recommendations-dev.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []  # No TLS in dev
+
+# Lower resource limits for development
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+# Disabled autoscaling in development
+autoscaling:
+  enabled: false
+
+# Development configuration
+config:
+  logLevel: "debug"
+  rustBacktrace: "1"
+
+  # Same algorithm weights
+  collaborativeWeight: "0.6"
+  contentWeight: "0.4"
+
+  # Shorter cache TTLs for faster testing
+  cacheTtlRecommendations: "60"   # 1 minute
+  cacheTtlTrending: "300"         # 5 minutes
+  cacheTtlUserProfile: "60"       # 1 minute
+
+  # Higher rate limits for testing
+  rateLimitRequests: "10000"
+  rateLimitWindowSecs: "60"
+
+  # More frequent updates for testing
+  updateIntervalUserSimilarity: "5"
+  updateIntervalEntitySimilarity: "3"
+  updateIntervalTrending: "300"
+  fullRebuildInterval: "3600"     # 1 hour
+
+  # Smaller database pools
+  dbPoolMaxConnections: "10"
+  dbPoolMinConnections: "2"
+  redisPoolMaxConnections: "5"
+
+# Secrets should be provided via --set or external secret management
+secrets:
+  databaseUrl: ""  # Set via: --set secrets.databaseUrl="postgresql://..."
+  redisUrl: ""     # Set via: --set secrets.redisUrl="redis://..."
+  apiKey: ""       # Set via: --set secrets.apiKey="dev-api-key"

@@ -1,8 +1,8 @@
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::StatusCode,
     response::IntoResponse,
-    Json,
 };
 use recommendation_models::TenantContext;
 use serde::Deserialize;
@@ -39,7 +39,11 @@ pub async fn create_interaction(
 ) -> ApiResult<impl IntoResponse> {
     debug!(
         "POST /api/v1/interactions - user_id={}, entity_id={}, entity_type={}, interaction_type={:?}, tenant_id={:?}",
-        request.user_id, request.entity_id, request.entity_type, request.interaction_type, request.tenant_id
+        request.user_id,
+        request.entity_id,
+        request.entity_type,
+        request.interaction_type,
+        request.tenant_id
     );
 
     // Extract tenant_id from request or use default
@@ -61,11 +65,17 @@ pub async fn create_interaction(
 
     info!(
         "Created interaction - user_id={}, entity_id={}, interaction_type={:?}, tenant_id={}",
-        interaction.user_id, interaction.entity_id, interaction.interaction_type, tenant_ctx.tenant_id
+        interaction.user_id,
+        interaction.entity_id,
+        interaction.interaction_type,
+        tenant_ctx.tenant_id
     );
 
     // Return 201 with created interaction
-    Ok((StatusCode::CREATED, Json(InteractionResponse::from(interaction))))
+    Ok((
+        StatusCode::CREATED,
+        Json(InteractionResponse::from(interaction)),
+    ))
 }
 
 /// Get user interactions endpoint

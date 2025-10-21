@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use sqlx::{PgPool, Row};
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 
 /// Migration runner configuration
 #[derive(Debug, Clone)]
@@ -66,13 +66,14 @@ impl MigrationRunner {
             "SELECT EXISTS(
                 SELECT 1 FROM pg_available_extensions 
                 WHERE name = 'vector'
-            ) as exists"
+            ) as exists",
         )
         .fetch_one(&self.pool)
         .await
         .context("Failed to check for pgvector extension")?;
 
-        let exists: bool = result.try_get("exists")
+        let exists: bool = result
+            .try_get("exists")
             .context("Failed to parse pgvector extension check result")?;
 
         if !exists {
@@ -91,17 +92,20 @@ impl MigrationRunner {
             "SELECT EXISTS(
                 SELECT 1 FROM pg_extension 
                 WHERE extname = 'vector'
-            ) as enabled"
+            ) as enabled",
         )
         .fetch_one(&self.pool)
         .await
         .context("Failed to check if pgvector extension is enabled")?;
 
-        let enabled: bool = result.try_get("enabled")
+        let enabled: bool = result
+            .try_get("enabled")
             .context("Failed to parse pgvector extension enabled check result")?;
 
         if !enabled {
-            warn!("pgvector extension is available but not enabled, it will be enabled during migrations");
+            warn!(
+                "pgvector extension is available but not enabled, it will be enabled during migrations"
+            );
         } else {
             info!("pgvector extension is installed and enabled");
         }
@@ -129,7 +133,7 @@ impl MigrationRunner {
         let result = sqlx::query(
             "SELECT version FROM _sqlx_migrations 
              ORDER BY version DESC 
-             LIMIT 1"
+             LIMIT 1",
         )
         .fetch_optional(&self.pool)
         .await
@@ -137,7 +141,8 @@ impl MigrationRunner {
 
         match result {
             Some(row) => {
-                let version: i64 = row.try_get("version")
+                let version: i64 = row
+                    .try_get("version")
                     .context("Failed to parse migration version")?;
                 Ok(Some(version))
             }
@@ -150,7 +155,7 @@ impl MigrationRunner {
         let rows = sqlx::query(
             "SELECT version, description, installed_on, success 
              FROM _sqlx_migrations 
-             ORDER BY version ASC"
+             ORDER BY version ASC",
         )
         .fetch_all(&self.pool)
         .await

@@ -1,5 +1,7 @@
-use recommendation_service::{EntityService, InteractionService, InteractionTypeService, RecommendationService};
-use recommendation_storage::{VectorStore, RedisCache};
+use recommendation_service::{
+    EntityService, InteractionService, InteractionTypeService, RecommendationService,
+};
+use recommendation_storage::{RedisCache, VectorStore};
 use std::sync::Arc;
 
 /// Application state shared across all handlers

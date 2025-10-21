@@ -233,7 +233,7 @@ impl TfIdfEncoder {
     /// Encode text using TF-IDF
     pub fn encode(&self, text: &str) -> Vec<f32> {
         let mut encoded = vec![0.0; self.dimension];
-        
+
         // Simple tokenization (split by whitespace and lowercase)
         let tokens: Vec<String> = text
             .to_lowercase()
@@ -277,15 +277,21 @@ mod tests {
     #[test]
     fn test_default_feature_extractor() {
         let extractor = DefaultFeatureExtractor::new(512);
-        
+
         let mut attributes = HashMap::new();
         attributes.insert("price".to_string(), AttributeValue::Number(99.99));
-        attributes.insert("category".to_string(), AttributeValue::String("electronics".to_string()));
+        attributes.insert(
+            "category".to_string(),
+            AttributeValue::String("electronics".to_string()),
+        );
         attributes.insert("in_stock".to_string(), AttributeValue::Boolean(true));
-        attributes.insert("tags".to_string(), AttributeValue::Array(vec!["new".to_string(), "sale".to_string()]));
+        attributes.insert(
+            "tags".to_string(),
+            AttributeValue::Array(vec!["new".to_string(), "sale".to_string()]),
+        );
 
         let features = extractor.extract_features(&attributes).unwrap();
-        
+
         assert_eq!(features.len(), 512);
         // Check that vector is normalized (magnitude should be ~1.0)
         let magnitude: f32 = features.iter().map(|x| x * x).sum::<f32>().sqrt();
@@ -310,7 +316,7 @@ mod tests {
     #[test]
     fn test_min_max_normalizer() {
         let normalizer = MinMaxNormalizer::new(0.0, 100.0);
-        
+
         assert_eq!(normalizer.normalize(0.0), 0.0);
         assert_eq!(normalizer.normalize(50.0), 0.5);
         assert_eq!(normalizer.normalize(100.0), 1.0);

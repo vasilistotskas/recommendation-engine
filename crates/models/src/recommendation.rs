@@ -28,7 +28,7 @@ pub enum Algorithm {
     },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RecommendationResponse {
     pub recommendations: Vec<ScoredEntity>,
     pub algorithm: String,
@@ -125,9 +125,12 @@ mod tests {
     fn test_algorithm_deserialization() {
         let json = r#"{"hybrid":{"collaborative_weight":0.6,"content_weight":0.4}}"#;
         let algo: Algorithm = serde_json::from_str(json).unwrap();
-        
+
         match algo {
-            Algorithm::Hybrid { collaborative_weight, content_weight } => {
+            Algorithm::Hybrid {
+                collaborative_weight,
+                content_weight,
+            } => {
                 assert_eq!(collaborative_weight, 0.6);
                 assert_eq!(content_weight, 0.4);
             }
@@ -196,14 +199,12 @@ mod tests {
     #[test]
     fn test_recommendation_response_serialization() {
         let response = RecommendationResponse {
-            recommendations: vec![
-                ScoredEntity {
-                    entity_id: "prod_789".to_string(),
-                    entity_type: "product".to_string(),
-                    score: 0.92,
-                    reason: Some("Popular item".to_string()),
-                },
-            ],
+            recommendations: vec![ScoredEntity {
+                entity_id: "prod_789".to_string(),
+                entity_type: "product".to_string(),
+                score: 0.92,
+                reason: Some("Popular item".to_string()),
+            }],
             algorithm: "collaborative".to_string(),
             cold_start: true,
             generated_at: Utc::now(),

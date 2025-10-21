@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "recommendation-engine.fullname" . }}
+  labels:
+    {{- include "recommendation-engine.labels" . | nindent 4 }}
+data:
+  log_level: {{ .Values.config.logLevel | quote }}
+  rust_backtrace: {{ .Values.config.rustBacktrace | quote }}
+  collaborative_weight: {{ .Values.config.collaborativeWeight | quote }}
+  content_weight: {{ .Values.config.contentWeight | quote }}
+  cache_ttl_recommendations: {{ .Values.config.cacheTtlRecommendations | quote }}
+  cache_ttl_trending: {{ .Values.config.cacheTtlTrending | quote }}
+  cache_ttl_user_profile: {{ .Values.config.cacheTtlUserProfile | quote }}
+  rate_limit_requests: {{ .Values.config.rateLimitRequests | quote }}
+  rate_limit_window_secs: {{ .Values.config.rateLimitWindowSecs | quote }}
+  update_interval_user_similarity: {{ .Values.config.updateIntervalUserSimilarity | quote }}
+  update_interval_entity_similarity: {{ .Values.config.updateIntervalEntitySimilarity | quote }}
+  update_interval_trending: {{ .Values.config.updateIntervalTrending | quote }}
+  full_rebuild_interval: {{ .Values.config.fullRebuildInterval | quote }}
+  default_recommendation_count: {{ .Values.config.defaultRecommendationCount | quote }}
+  similarity_threshold: {{ .Values.config.similarityThreshold | quote }}
+  cold_start_min_interactions: {{ .Values.config.coldStartMinInteractions | quote }}
+  db_pool_max_connections: {{ .Values.config.dbPoolMaxConnections | quote }}
+  db_pool_min_connections: {{ .Values.config.dbPoolMinConnections | quote }}
+  redis_pool_max_connections: {{ .Values.config.redisPoolMaxConnections | quote }}
+  max_attribute_depth: {{ .Values.config.maxAttributeDepth | quote }}
+  vector_dimension: {{ .Values.config.vectorDimension | quote }}

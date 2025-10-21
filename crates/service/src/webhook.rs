@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use recommendation_models::{Result, RecommendationError};
+use recommendation_models::{RecommendationError, Result};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -79,11 +79,7 @@ impl WebhookEvent {
     }
 
     /// Create a trending_changed event
-    pub fn trending_changed(
-        tenant_id: String,
-        entity_type: String,
-        trending_count: usize,
-    ) -> Self {
+    pub fn trending_changed(tenant_id: String, entity_type: String, trending_count: usize) -> Self {
         let mut data = HashMap::new();
         data.insert("entity_type".to_string(), serde_json::json!(entity_type));
         data.insert(
@@ -174,17 +170,11 @@ impl WebhookDelivery {
     }
 
     /// Send webhook event to a single URL with retry logic
-    async fn send_to_url(
-        &self,
-        url: &str,
-        event: &WebhookEvent,
-        attempt: u32,
-    ) -> Result<()> {
-        let payload = serde_json::to_string(event)
-            .map_err(|e| {
-                error!("Failed to serialize webhook event: {:?}", e);
-                RecommendationError::InternalError
-            })?;
+    async fn send_to_url(&self, url: &str, event: &WebhookEvent, attempt: u32) -> Result<()> {
+        let payload = serde_json::to_string(event).map_err(|e| {
+            error!("Failed to serialize webhook event: {:?}", e);
+            RecommendationError::InternalError
+        })?;
 
         let signature = self.generate_signature(&payload);
 
@@ -357,9 +347,18 @@ mod tests {
 
         assert_eq!(event.event_type, WebhookEventType::ModelUpdated);
         assert_eq!(event.tenant_id, "tenant_1");
-        assert_eq!(event.data.get("users_updated").unwrap(), &serde_json::json!(100));
-        assert_eq!(event.data.get("entities_updated").unwrap(), &serde_json::json!(50));
-        assert_eq!(event.data.get("duration_ms").unwrap(), &serde_json::json!(1500));
+        assert_eq!(
+            event.data.get("users_updated").unwrap(),
+            &serde_json::json!(100)
+        );
+        assert_eq!(
+            event.data.get("entities_updated").unwrap(),
+            &serde_json::json!(50)
+        );
+        assert_eq!(
+            event.data.get("duration_ms").unwrap(),
+            &serde_json::json!(1500)
+        );
     }
 
     #[test]
@@ -393,7 +392,10 @@ mod tests {
     #[test]
     fn test_event_type_display() {
         assert_eq!(WebhookEventType::ModelUpdated.to_string(), "model_updated");
-        assert_eq!(WebhookEventType::TrendingChanged.to_string(), "trending_changed");
+        assert_eq!(
+            WebhookEventType::TrendingChanged.to_string(),
+            "trending_changed"
+        );
         assert_eq!(
             WebhookEventType::ErrorThresholdExceeded.to_string(),
             "error_threshold_exceeded"

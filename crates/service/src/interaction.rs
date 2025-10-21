@@ -1,12 +1,12 @@
+use chrono::{DateTime, Utc};
 use recommendation_models::{
-    Interaction, InteractionType, TenantContext, RecommendationError, Result,
+    Interaction, InteractionType, RecommendationError, Result, TenantContext,
 };
 use recommendation_storage::VectorStore;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tracing::{info, debug, warn};
-use chrono::{DateTime, Utc};
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
+use tracing::{debug, info, warn};
 
 /// Service for interaction tracking and user profile management
 /// Handles interaction recording, deduplication, user profile updates, and history queries
@@ -24,7 +24,7 @@ impl InteractionService {
         interaction_weights.insert("add_to_cart".to_string(), 3.0);
         interaction_weights.insert("purchase".to_string(), 5.0);
         interaction_weights.insert("like".to_string(), 2.0);
-        
+
         Self {
             vector_store,
             interaction_weights,
@@ -65,13 +65,16 @@ impl InteractionService {
         self.validate_entity_id(&entity_id)?;
 
         // Get weight for interaction type from database registry (with fallback to defaults)
-        let weight = self.get_interaction_weight_async(ctx, &interaction_type).await?;
+        let weight = self
+            .get_interaction_weight_async(ctx, &interaction_type)
+            .await?;
 
         // Use provided timestamp or current time
         let timestamp = timestamp.unwrap_or_else(Utc::now);
 
         // Record interaction in storage (with deduplication)
-        let interaction = self.vector_store
+        let interaction = self
+            .vector_store
             .record_interaction(
                 ctx,
                 &user_id,
@@ -93,12 +96,14 @@ impl InteractionService {
         let vector_store = Arc::clone(&self.vector_store);
         let ctx_clone = ctx.clone();
         let user_id_clone = user_id.clone();
-        
+
         tokio::spawn(async move {
             // Wait a bit to allow batching of multiple interactions
             sleep(Duration::from_secs(5)).await;
-            
-            if let Err(e) = update_user_profile_async(&vector_store, &ctx_clone, &user_id_clone).await {
+
+            if let Err(e) =
+                update_user_profile_async(&vector_store, &ctx_clone, &user_id_clone).await
+            {
                 warn!(
                     "Failed to update user profile asynchronously: tenant={}, user={}, error={}",
                     ctx_clone.tenant_id, user_id_clone, e
@@ -124,7 +129,8 @@ impl InteractionService {
 
         self.validate_user_id(&user_id)?;
 
-        let interactions = self.vector_store
+        let interactions = self
+            .vector_store
             .get_user_interactions(ctx, &user_id, limit, offset)
             .await?;
 
@@ -155,7 +161,8 @@ impl InteractionService {
         self.validate_user_id(&user_id)?;
 
         // Get all interactions and filter by type
-        let all_interactions = self.vector_store
+        let all_interactions = self
+            .vector_store
             .get_user_interactions(ctx, &user_id, limit * 2, offset)
             .await?;
 
@@ -199,7 +206,8 @@ impl InteractionService {
         }
 
         // Get all interactions and filter by date range
-        let all_interactions = self.vector_store
+        let all_interactions = self
+            .vector_store
             .get_user_interactions(ctx, &user_id, limit * 2, offset)
             .await?;
 
@@ -224,7 +232,14 @@ impl InteractionService {
     pub async fn bulk_import_interactions(
         &self,
         ctx: &TenantContext,
-        interactions: Vec<(String, String, String, InteractionType, Option<HashMap<String, String>>, Option<DateTime<Utc>>)>,
+        interactions: Vec<(
+            String,
+            String,
+            String,
+            InteractionType,
+            Option<HashMap<String, String>>,
+            Option<DateTime<Utc>>,
+        )>,
     ) -> Result<BulkImportResult> {
         info!(
             "InteractionService: Starting bulk import - tenant={}, count={}",
@@ -239,7 +254,7 @@ impl InteractionService {
 
         // Process in batches of 1000
         const BATCH_SIZE: usize = 1000;
-        
+
         for (batch_idx, batch) in interactions.chunks(BATCH_SIZE).enumerate() {
             debug!(
                 "InteractionService: Processing batch {} of {} (size: {})",
@@ -291,7 +306,8 @@ impl InteractionService {
 
             // Batch insert valid interactions
             if !batch_interactions.is_empty() {
-                match self.vector_store
+                match self
+                    .vector_store
                     .bulk_import_interactions(ctx, batch_interactions.clone())
                     .await
                 {
@@ -352,7 +368,9 @@ impl InteractionService {
     fn get_interaction_weight(&self, interaction_type: &InteractionType) -> f32 {
         match interaction_type {
             InteractionType::View => *self.interaction_weights.get("view").unwrap_or(&1.0),
-            InteractionType::AddToCart => *self.interaction_weights.get("add_to_cart").unwrap_or(&3.0),
+            InteractionType::AddToCart => {
+                *self.interaction_weights.get("add_to_cart").unwrap_or(&3.0)
+            }
             InteractionType::Purchase => *self.interaction_weights.get("purchase").unwrap_or(&5.0),
             InteractionType::Like => *self.interaction_weights.get("like").unwrap_or(&2.0),
             InteractionType::Rating(rating) => *rating,
@@ -370,7 +388,8 @@ impl InteractionService {
         interaction_type: &InteractionType,
     ) -> Result<f32> {
         // Try to get weight from database registry first
-        let weight = self.vector_store
+        let weight = self
+            .vector_store
             .get_interaction_weight(ctx, interaction_type)
             .await?;
 
@@ -444,7 +463,8 @@ impl InteractionService {
             ));
         }
 
-        let interactions = self.vector_store
+        let interactions = self
+            .vector_store
             .export_interactions(ctx, start_date, end_date)
             .await?;
 
@@ -468,7 +488,8 @@ impl InteractionService {
             ctx.tenant_id, include_vectors
         );
 
-        let user_profiles = self.vector_store
+        let user_profiles = self
+            .vector_store
             .export_user_profiles(ctx, include_vectors)
             .await?;
 
@@ -577,7 +598,6 @@ pub struct BulkImportError {
     pub error: String,
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -600,11 +620,17 @@ mod tests {
     #[tokio::test]
     async fn test_interaction_service_creation() {
         let service = create_test_service();
-        
+
         // Check default weights
         assert_eq!(service.get_interaction_weight(&InteractionType::View), 1.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::AddToCart), 3.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Purchase), 5.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::AddToCart),
+            3.0
+        );
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Purchase),
+            5.0
+        );
         assert_eq!(service.get_interaction_weight(&InteractionType::Like), 2.0);
     }
 
@@ -614,43 +640,58 @@ mod tests {
         custom_weights.insert("view".to_string(), 2.0);
         custom_weights.insert("like".to_string(), 5.0);
         custom_weights.insert("share".to_string(), 10.0);
-        
+
         let service = create_test_service_with_weights(custom_weights);
-        
+
         // Check custom weights
         assert_eq!(service.get_interaction_weight(&InteractionType::View), 2.0);
         assert_eq!(service.get_interaction_weight(&InteractionType::Like), 5.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Custom("share".to_string())), 10.0);
-        
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Custom("share".to_string())),
+            10.0
+        );
+
         // Default weight for unknown custom type
-        assert_eq!(service.get_interaction_weight(&InteractionType::Custom("unknown".to_string())), 1.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Custom("unknown".to_string())),
+            1.0
+        );
     }
 
     #[tokio::test]
     async fn test_get_interaction_weight_rating() {
         let service = create_test_service();
-        
+
         // Rating interactions use the rating value as weight
-        assert_eq!(service.get_interaction_weight(&InteractionType::Rating(4.5)), 4.5);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Rating(3.0)), 3.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Rating(5.0)), 5.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Rating(4.5)),
+            4.5
+        );
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Rating(3.0)),
+            3.0
+        );
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Rating(5.0)),
+            5.0
+        );
     }
 
     #[tokio::test]
     async fn test_validate_user_id() {
         let service = create_test_service();
-        
+
         // Valid user_id
         assert!(service.validate_user_id("user_123").is_ok());
         assert!(service.validate_user_id("user-456").is_ok());
         assert!(service.validate_user_id("u").is_ok());
-        
+
         // Invalid user_id - empty
         assert!(service.validate_user_id("").is_err());
-        
+
         // Invalid user_id - too long
         assert!(service.validate_user_id(&"a".repeat(256)).is_err());
-        
+
         // Invalid user_id - null character
         assert!(service.validate_user_id("user\0null").is_err());
     }
@@ -658,18 +699,18 @@ mod tests {
     #[tokio::test]
     async fn test_validate_entity_id() {
         let service = create_test_service();
-        
+
         // Valid entity_id
         assert!(service.validate_entity_id("product_123").is_ok());
         assert!(service.validate_entity_id("entity-456").is_ok());
         assert!(service.validate_entity_id("e").is_ok());
-        
+
         // Invalid entity_id - empty
         assert!(service.validate_entity_id("").is_err());
-        
+
         // Invalid entity_id - too long
         assert!(service.validate_entity_id(&"a".repeat(256)).is_err());
-        
+
         // Invalid entity_id - null character
         assert!(service.validate_entity_id("entity\0null").is_err());
     }
@@ -677,24 +718,48 @@ mod tests {
     #[test]
     fn test_matches_interaction_type() {
         // Exact matches
-        assert!(matches_interaction_type(&InteractionType::View, &InteractionType::View));
-        assert!(matches_interaction_type(&InteractionType::AddToCart, &InteractionType::AddToCart));
-        assert!(matches_interaction_type(&InteractionType::Purchase, &InteractionType::Purchase));
-        assert!(matches_interaction_type(&InteractionType::Like, &InteractionType::Like));
-        
+        assert!(matches_interaction_type(
+            &InteractionType::View,
+            &InteractionType::View
+        ));
+        assert!(matches_interaction_type(
+            &InteractionType::AddToCart,
+            &InteractionType::AddToCart
+        ));
+        assert!(matches_interaction_type(
+            &InteractionType::Purchase,
+            &InteractionType::Purchase
+        ));
+        assert!(matches_interaction_type(
+            &InteractionType::Like,
+            &InteractionType::Like
+        ));
+
         // Rating matches any rating
-        assert!(matches_interaction_type(&InteractionType::Rating(4.5), &InteractionType::Rating(0.0)));
-        assert!(matches_interaction_type(&InteractionType::Rating(3.0), &InteractionType::Rating(5.0)));
-        
+        assert!(matches_interaction_type(
+            &InteractionType::Rating(4.5),
+            &InteractionType::Rating(0.0)
+        ));
+        assert!(matches_interaction_type(
+            &InteractionType::Rating(3.0),
+            &InteractionType::Rating(5.0)
+        ));
+
         // Custom type matches
         assert!(matches_interaction_type(
             &InteractionType::Custom("share".to_string()),
             &InteractionType::Custom("share".to_string())
         ));
-        
+
         // Non-matches
-        assert!(!matches_interaction_type(&InteractionType::View, &InteractionType::Like));
-        assert!(!matches_interaction_type(&InteractionType::Purchase, &InteractionType::AddToCart));
+        assert!(!matches_interaction_type(
+            &InteractionType::View,
+            &InteractionType::Like
+        ));
+        assert!(!matches_interaction_type(
+            &InteractionType::Purchase,
+            &InteractionType::AddToCart
+        ));
         assert!(!matches_interaction_type(
             &InteractionType::Custom("share".to_string()),
             &InteractionType::Custom("comment".to_string())
@@ -715,7 +780,7 @@ mod tests {
         };
         assert_eq!(completed.status, ImportStatus::Completed);
         assert_eq!(completed.errors.len(), 0);
-        
+
         // Test partially completed status
         let partial = BulkImportResult {
             job_id: "job_2".to_string(),
@@ -724,17 +789,15 @@ mod tests {
             processed: 100,
             successful: 80,
             failed: 20,
-            errors: vec![
-                BulkImportError {
-                    user_id: "user_1".to_string(),
-                    entity_id: "entity_1".to_string(),
-                    error: "Validation failed".to_string(),
-                }
-            ],
+            errors: vec![BulkImportError {
+                user_id: "user_1".to_string(),
+                entity_id: "entity_1".to_string(),
+                error: "Validation failed".to_string(),
+            }],
         };
         assert_eq!(partial.status, ImportStatus::PartiallyCompleted);
         assert_eq!(partial.errors.len(), 1);
-        
+
         // Test failed status
         let failed = BulkImportResult {
             job_id: "job_3".to_string(),
@@ -755,7 +818,7 @@ mod tests {
             entity_id: "entity_456".to_string(),
             error: "Invalid user_id format".to_string(),
         };
-        
+
         assert_eq!(error.user_id, "user_123");
         assert_eq!(error.entity_id, "entity_456");
         assert!(error.error.contains("Invalid"));
@@ -764,35 +827,44 @@ mod tests {
     #[tokio::test]
     async fn test_interaction_type_weight_defaults() {
         let service = create_test_service();
-        
+
         // Test all default interaction type weights
         assert_eq!(service.get_interaction_weight(&InteractionType::View), 1.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::AddToCart), 3.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Purchase), 5.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::AddToCart),
+            3.0
+        );
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Purchase),
+            5.0
+        );
         assert_eq!(service.get_interaction_weight(&InteractionType::Like), 2.0);
-        
+
         // Custom type without configured weight should default to 1.0
-        assert_eq!(service.get_interaction_weight(&InteractionType::Custom("unknown".to_string())), 1.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Custom("unknown".to_string())),
+            1.0
+        );
     }
 
     #[tokio::test]
     async fn test_validation_error_messages() {
         let service = create_test_service();
-        
+
         // Test empty user_id error message
         let result = service.validate_user_id("");
         assert!(result.is_err());
         if let Err(RecommendationError::ValidationError(msg)) = result {
             assert!(msg.contains("empty"));
         }
-        
+
         // Test too long user_id error message
         let result = service.validate_user_id(&"a".repeat(256));
         assert!(result.is_err());
         if let Err(RecommendationError::ValidationError(msg)) = result {
             assert!(msg.contains("255"));
         }
-        
+
         // Test null character error message
         let result = service.validate_user_id("user\0null");
         assert!(result.is_err());
@@ -806,24 +878,33 @@ mod tests {
         let mut custom_weights = HashMap::new();
         custom_weights.insert("view".to_string(), 10.0);
         custom_weights.insert("purchase".to_string(), 100.0);
-        
+
         let service = create_test_service_with_weights(custom_weights);
-        
+
         // Custom weights should override defaults
         assert_eq!(service.get_interaction_weight(&InteractionType::View), 10.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Purchase), 100.0);
-        
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Purchase),
+            100.0
+        );
+
         // Non-overridden types should use defaults
-        assert_eq!(service.get_interaction_weight(&InteractionType::AddToCart), 3.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::AddToCart),
+            3.0
+        );
         assert_eq!(service.get_interaction_weight(&InteractionType::Like), 2.0);
     }
 
     #[test]
     fn test_import_status_equality() {
         assert_eq!(ImportStatus::Completed, ImportStatus::Completed);
-        assert_eq!(ImportStatus::PartiallyCompleted, ImportStatus::PartiallyCompleted);
+        assert_eq!(
+            ImportStatus::PartiallyCompleted,
+            ImportStatus::PartiallyCompleted
+        );
         assert_eq!(ImportStatus::Failed, ImportStatus::Failed);
-        
+
         assert_ne!(ImportStatus::Completed, ImportStatus::Failed);
         assert_ne!(ImportStatus::PartiallyCompleted, ImportStatus::Completed);
     }
@@ -831,11 +912,11 @@ mod tests {
     #[tokio::test]
     async fn test_unknown_interaction_type_defaults_to_one() {
         let service = create_test_service();
-        
+
         // Unknown custom interaction types should default to weight 1.0
         let unknown_type = InteractionType::Custom("completely_unknown_type".to_string());
         assert_eq!(service.get_interaction_weight(&unknown_type), 1.0);
-        
+
         // Another unknown type
         let another_unknown = InteractionType::Custom("never_seen_before".to_string());
         assert_eq!(service.get_interaction_weight(&another_unknown), 1.0);
@@ -846,14 +927,23 @@ mod tests {
         let mut custom_weights = HashMap::new();
         custom_weights.insert("share".to_string(), 4.0);
         custom_weights.insert("bookmark".to_string(), 2.5);
-        
+
         let service = create_test_service_with_weights(custom_weights);
-        
+
         // Configured custom types should use their configured weight
-        assert_eq!(service.get_interaction_weight(&InteractionType::Custom("share".to_string())), 4.0);
-        assert_eq!(service.get_interaction_weight(&InteractionType::Custom("bookmark".to_string())), 2.5);
-        
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Custom("share".to_string())),
+            4.0
+        );
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Custom("bookmark".to_string())),
+            2.5
+        );
+
         // Unknown custom type should still default to 1.0
-        assert_eq!(service.get_interaction_weight(&InteractionType::Custom("unknown".to_string())), 1.0);
+        assert_eq!(
+            service.get_interaction_weight(&InteractionType::Custom("unknown".to_string())),
+            1.0
+        );
     }
 }

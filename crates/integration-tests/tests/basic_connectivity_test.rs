@@ -23,25 +23,25 @@ async fn test_database_connectivity() -> Result<()> {
 
     // Test database connection
     let database = Database::new(db_config).await?;
-    
+
     // Verify we can execute a simple query
     let result = sqlx::query("SELECT 1 as test")
         .fetch_one(database.pool())
         .await?;
-    
+
     let test_value: i32 = result.try_get("test")?;
     assert_eq!(test_value, 1, "Database query should return 1");
-    
+
     println!("✓ Database connectivity test passed");
-    
+
     Ok(())
 }
 
 #[tokio::test]
 async fn test_redis_connectivity() -> Result<()> {
     // Use test Redis URL from environment or default
-    let redis_url = std::env::var("TEST_REDIS_URL")
-        .unwrap_or_else(|_| "redis://localhost:6379".to_string());
+    let redis_url =
+        std::env::var("TEST_REDIS_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
 
     let redis_config = RedisCacheConfig {
         url: redis_url,
@@ -53,21 +53,27 @@ async fn test_redis_connectivity() -> Result<()> {
 
     // Test Redis connection
     let redis_cache = RedisCache::new(redis_config).await?;
-    
+
     // Test set and get operations
     let test_key = "test_connectivity_key";
     let test_value = "test_value".to_string();
-    
-    redis_cache.set(test_key, &test_value, std::time::Duration::from_secs(60)).await?;
+
+    redis_cache
+        .set(test_key, &test_value, std::time::Duration::from_secs(60))
+        .await?;
     let retrieved: Option<String> = redis_cache.get(test_key).await?;
-    
-    assert_eq!(retrieved, Some(test_value), "Redis should return the stored value");
-    
+
+    assert_eq!(
+        retrieved,
+        Some(test_value),
+        "Redis should return the stored value"
+    );
+
     // Cleanup
     redis_cache.delete(test_key).await?;
-    
+
     println!("✓ Redis connectivity test passed");
-    
+
     Ok(())
 }
 
@@ -87,7 +93,7 @@ async fn test_database_migrations_applied() -> Result<()> {
     };
 
     let database = Database::new(db_config).await?;
-    
+
     // Check if required tables exist
     let tables = vec![
         "entities",
@@ -96,7 +102,7 @@ async fn test_database_migrations_applied() -> Result<()> {
         "trending_entities",
         "interaction_types",
     ];
-    
+
     for table in tables {
         let query = format!(
             "SELECT EXISTS (
@@ -106,34 +112,32 @@ async fn test_database_migrations_applied() -> Result<()> {
             )",
             table
         );
-        
-        let result = sqlx::query(&query)
-            .fetch_one(database.pool())
-            .await?;
-        
+
+        let result = sqlx::query(&query).fetch_one(database.pool()).await?;
+
         let exists: bool = result.try_get("exists")?;
         assert!(exists, "Table '{}' should exist after migrations", table);
     }
-    
+
     println!("✓ All required tables exist");
-    
+
     // Check if pgvector extension is installed
     let result = sqlx::query(
         "SELECT EXISTS (
             SELECT FROM pg_extension 
             WHERE extname = 'vector'
-        )"
+        )",
     )
     .fetch_one(database.pool())
     .await?;
-    
+
     let pgvector_exists: bool = result.try_get("exists")?;
-    
+
     if pgvector_exists {
         println!("✓ pgvector extension is installed");
     } else {
         println!("⚠ pgvector extension is NOT installed (required for full tests)");
     }
-    
+
     Ok(())
 }

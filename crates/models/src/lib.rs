@@ -1,22 +1,22 @@
 pub mod entity;
-pub mod interaction;
-pub mod user_profile;
-pub mod recommendation;
 pub mod error;
-pub mod tenant;
 pub mod feature_extractor;
+pub mod interaction;
 pub mod interaction_type_registry;
+pub mod recommendation;
+pub mod tenant;
+pub mod user_profile;
 
-pub use entity::{Entity, AttributeValue};
-pub use interaction::{Interaction, InteractionType};
-pub use user_profile::UserProfile;
-pub use recommendation::{RecommendationRequest, RecommendationResponse, ScoredEntity, Algorithm};
-pub use error::{RecommendationError, ErrorResponse, ErrorDetail, Result};
-pub use tenant::TenantContext;
+pub use entity::{AttributeValue, Entity};
+pub use error::{ErrorDetail, ErrorResponse, RecommendationError, Result};
 pub use feature_extractor::{
-    FeatureExtractor, DefaultFeatureExtractor, OneHotEncoder, MinMaxNormalizer, TfIdfEncoder,
+    DefaultFeatureExtractor, FeatureExtractor, MinMaxNormalizer, OneHotEncoder, TfIdfEncoder,
 };
+pub use interaction::{Interaction, InteractionType};
 pub use interaction_type_registry::{
-    RegisteredInteractionType, RegisterInteractionTypeRequest, UpdateInteractionTypeRequest,
-    ListInteractionTypesResponse,
+    ListInteractionTypesResponse, RegisterInteractionTypeRequest, RegisteredInteractionType,
+    UpdateInteractionTypeRequest,
 };
+pub use recommendation::{Algorithm, RecommendationRequest, RecommendationResponse, ScoredEntity};
+pub use tenant::TenantContext;
+pub use user_profile::UserProfile;

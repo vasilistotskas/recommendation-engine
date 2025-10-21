@@ -18,11 +18,12 @@ impl Default for DatabaseConfig {
     fn default() -> Self {
         Self {
             url: "postgresql://localhost:5432/recommendations".to_string(),
-            // Increased for high load (50K entities, high concurrency)
-            max_connections: 50,
-            min_connections: 10,
-            // Shorter timeout to fail fast under load
-            acquire_timeout_secs: 2,
+            // Increased for very high concurrency (1000+ concurrent requests)
+            // With 1000 concurrent requests, we need more connections to avoid exhaustion
+            max_connections: 100,
+            min_connections: 20,
+            // Longer timeout to handle high load without failing requests
+            acquire_timeout_secs: 5,
             // Keep connections alive longer to reduce overhead
             idle_timeout_secs: 300,
             max_lifetime_secs: 1800,
@@ -88,6 +89,30 @@ impl Database {
             .acquire_timeout(Duration::from_secs(config.acquire_timeout_secs))
             .idle_timeout(Some(Duration::from_secs(config.idle_timeout_secs)))
             .max_lifetime(Some(Duration::from_secs(config.max_lifetime_secs)))
+            // Optimize connection settings for high-performance vector queries
+            .after_connect(|conn, _meta| {
+                Box::pin(async move {
+                    // Set statement timeout to 10 seconds for all queries
+                    // This prevents slow queries from exhausting the connection pool
+                    sqlx::query("SET statement_timeout = '10s'")
+                        .execute(&mut *conn)
+                        .await?;
+
+                    // Increase work_mem for better vector query performance
+                    // Higher work_mem allows PostgreSQL to use more memory for sorting/hashing
+                    // which is beneficial for vector similarity searches
+                    sqlx::query("SET work_mem = '16MB'")
+                        .execute(&mut *conn)
+                        .await?;
+
+                    // Enable parallel query execution for large datasets
+                    sqlx::query("SET max_parallel_workers_per_gather = 4")
+                        .execute(&mut *conn)
+                        .await?;
+
+                    Ok(())
+                })
+            })
             .connect(&config.url)
             .await
             .context("Failed to connect to database")?;
@@ -103,10 +128,7 @@ impl Database {
     /// Health check query for readiness probe
     /// Returns true if the database is accessible and responsive
     pub async fn health_check(&self) -> Result<bool> {
-        match sqlx::query("SELECT 1")
-            .fetch_one(&self.pool)
-            .await
-        {
+        match sqlx::query("SELECT 1").fetch_one(&self.pool).await {
             Ok(_) => Ok(true),
             Err(e) => {
                 warn!("Database health check failed: {}", e);
@@ -144,17 +166,14 @@ mod tests {
     #[test]
     fn test_database_config_default() {
         let config = DatabaseConfig::default();
-        assert_eq!(config.max_connections, 20);
-        assert_eq!(config.min_connections, 5);
-        assert_eq!(config.acquire_timeout_secs, 3);
+        assert_eq!(config.max_connections, 100);
+        assert_eq!(config.min_connections, 20);
+        assert_eq!(config.acquire_timeout_secs, 5);
     }
 
     #[test]
     fn test_pool_stats() {
-        let stats = PoolStats {
-            size: 10,
-            idle: 5,
-        };
+        let stats = PoolStats { size: 10, idle: 5 };
         assert_eq!(stats.size, 10);
         assert_eq!(stats.idle, 5);
     }

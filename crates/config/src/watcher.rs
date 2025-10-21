@@ -1,12 +1,12 @@
+use crate::config::{AlgorithmConfig, CacheConfig, ColdStartConfig};
+use crate::error::{ConfigError, Result};
+use crate::loader::ConfigLoader;
 use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tracing::{debug, error, info};
-use crate::config::{AlgorithmConfig, CacheConfig, ColdStartConfig};
-use crate::error::{ConfigError, Result};
-use crate::loader::ConfigLoader;
 
 /// Configuration watcher for hot-reload of non-critical configuration
 pub struct ConfigWatcher {
@@ -38,7 +38,10 @@ impl ConfigWatcher {
 
     /// Start watching the configuration file for changes
     pub async fn start_watching(&mut self) -> Result<()> {
-        info!("Starting configuration file watcher for: {:?}", self.config_path);
+        info!(
+            "Starting configuration file watcher for: {:?}",
+            self.config_path
+        );
 
         let (tx, mut rx) = mpsc::channel(100);
         let config_path = self.config_path.clone();
@@ -52,9 +55,9 @@ impl ConfigWatcher {
                     let _ = tx.blocking_send(event);
                 }
             },
-            Config::default()
-                .with_poll_interval(Duration::from_secs(2)),
-        ).map_err(|e| ConfigError::LoadError(format!("Failed to create file watcher: {}", e)))?;
+            Config::default().with_poll_interval(Duration::from_secs(2)),
+        )
+        .map_err(|e| ConfigError::LoadError(format!("Failed to create file watcher: {}", e)))?;
 
         // Watch the configuration file
         watcher
@@ -133,7 +136,8 @@ impl ConfigWatcher {
             &self.algorithms,
             &self.cache,
             &self.cold_start,
-        ).await
+        )
+        .await
     }
 
     /// Get current algorithm configuration
@@ -225,9 +229,18 @@ mod tests {
         let config = HotReloadableConfig::new(algo.clone(), cache.clone(), cold_start.clone());
 
         // Test getters
-        assert_eq!(config.get_algorithms().collaborative_weight, algo.collaborative_weight);
-        assert_eq!(config.get_cache().recommendation_ttl_secs, cache.recommendation_ttl_secs);
-        assert_eq!(config.get_cold_start().min_interactions, cold_start.min_interactions);
+        assert_eq!(
+            config.get_algorithms().collaborative_weight,
+            algo.collaborative_weight
+        );
+        assert_eq!(
+            config.get_cache().recommendation_ttl_secs,
+            cache.recommendation_ttl_secs
+        );
+        assert_eq!(
+            config.get_cold_start().min_interactions,
+            cold_start.min_interactions
+        );
 
         // Test updates
         let mut new_algo = algo.clone();
@@ -242,9 +255,13 @@ mod tests {
     async fn test_config_watcher_creation() {
         let temp_dir = TempDir::new().unwrap();
         let config_path = temp_dir.path().join("config.toml");
-        
+
         // Create a dummy config file
-        fs::write(&config_path, "[algorithms]\ncollaborative_weight = 0.6\ncontent_based_weight = 0.4\n").unwrap();
+        fs::write(
+            &config_path,
+            "[algorithms]\ncollaborative_weight = 0.6\ncontent_based_weight = 0.4\n",
+        )
+        .unwrap();
 
         let algo = Arc::new(RwLock::new(AlgorithmConfig::default()));
         let cache = Arc::new(RwLock::new(CacheConfig::default()));

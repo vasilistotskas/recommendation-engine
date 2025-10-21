@@ -1,8 +1,4 @@
-use axum::{
-    extract::Request,
-    http::HeaderValue,
-    response::Response,
-};
+use axum::{extract::Request, http::HeaderValue, response::Response};
 use futures::future::BoxFuture;
 use std::task::{Context, Poll};
 use tower::{Layer, Service};

@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn test_user_profile_with_large_vector() {
         let large_vector: Vec<f32> = (0..512).map(|i| i as f32 / 512.0).collect();
-        
+
         let profile = UserProfile {
             user_id: "user_999".to_string(),
             preference_vector: large_vector.clone(),

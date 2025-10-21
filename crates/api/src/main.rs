@@ -1,25 +1,24 @@
 use anyhow::Result;
-use std::net::SocketAddr;
-use std::sync::Arc;
-use tower_http::{
-    cors::{CorsLayer, Any},
-    trace::{TraceLayer, DefaultMakeSpan, DefaultOnResponse},
-    compression::CompressionLayer,
-};
-use tracing::Level;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use recommendation_api::{
-    middleware::{RequestIdLayer, AuthLayer, RateLimitLayer},
+    middleware::{AuthLayer, RateLimitLayer, RequestIdLayer},
     routes::build_router,
     state::AppState,
 };
-use recommendation_storage::{Database, DatabaseConfig, VectorStore, RedisCache, RedisCacheConfig};
-use recommendation_service::{EntityService, InteractionService, RecommendationService};
 use recommendation_engine::{
-    CollaborativeFilteringEngine, CollaborativeConfig,
-    ContentBasedFilteringEngine, ContentBasedConfig,
-    HybridEngine, HybridConfig,
+    CollaborativeConfig, CollaborativeFilteringEngine, ContentBasedConfig,
+    ContentBasedFilteringEngine, HybridConfig, HybridEngine,
 };
+use recommendation_service::{EntityService, InteractionService, RecommendationService};
+use recommendation_storage::{Database, DatabaseConfig, RedisCache, RedisCacheConfig, VectorStore};
+use std::net::SocketAddr;
+use std::sync::Arc;
+use tower_http::{
+    compression::CompressionLayer,
+    cors::{Any, CorsLayer},
+    trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer},
+};
+use tracing::Level;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -38,11 +37,10 @@ async fn main() -> Result<()> {
     tracing::info!("Starting Recommendation Engine API");
 
     // Initialize database connection
-    let database_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| {
-            tracing::warn!("DATABASE_URL not set, using default");
-            "postgresql://localhost:5432/recommendations".to_string()
-        });
+    let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        tracing::warn!("DATABASE_URL not set, using default");
+        "postgresql://localhost:5432/recommendations".to_string()
+    });
 
     let db_config = DatabaseConfig {
         url: database_url,
@@ -63,11 +61,10 @@ async fn main() -> Result<()> {
     tracing::info!("Database connection established");
 
     // Initialize Redis cache
-    let redis_url = std::env::var("REDIS_URL")
-        .unwrap_or_else(|_| {
-            tracing::warn!("REDIS_URL not set, using default");
-            "redis://localhost:6379".to_string()
-        });
+    let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| {
+        tracing::warn!("REDIS_URL not set, using default");
+        "redis://localhost:6379".to_string()
+    });
 
     let redis_config = RedisCacheConfig {
         url: redis_url,
@@ -100,13 +97,13 @@ async fn main() -> Result<()> {
             .unwrap_or(0.1),
         default_count: 10,
     };
-    
+
     let collaborative_engine = Arc::new(CollaborativeFilteringEngine::new(
         Arc::clone(&vector_store),
         Arc::clone(&redis_cache),
         collaborative_config,
     ));
-    
+
     let content_based_config = ContentBasedConfig {
         similarity_threshold: std::env::var("SIMILARITY_THRESHOLD")
             .ok()
@@ -114,13 +111,13 @@ async fn main() -> Result<()> {
             .unwrap_or(0.5),
         default_count: 10,
     };
-    
+
     let content_based_engine = Arc::new(ContentBasedFilteringEngine::new(
         Arc::clone(&vector_store),
         Arc::clone(&redis_cache),
         content_based_config,
     ));
-    
+
     // Configure hybrid engine with weights from environment or defaults
     let hybrid_config = HybridConfig {
         collaborative_weight: std::env::var("COLLABORATIVE_WEIGHT")
@@ -135,7 +132,7 @@ async fn main() -> Result<()> {
         min_categories: 3,
         default_count: 10,
     };
-    
+
     let hybrid_engine = Arc::new(HybridEngine::new(
         Arc::clone(&collaborative_engine),
         Arc::clone(&content_based_engine),
@@ -158,8 +155,8 @@ async fn main() -> Result<()> {
     ));
 
     // Get default tenant ID from environment
-    let default_tenant_id = std::env::var("DEFAULT_TENANT_ID")
-        .unwrap_or_else(|_| "default".to_string());
+    let default_tenant_id =
+        std::env::var("DEFAULT_TENANT_ID").unwrap_or_else(|_| "default".to_string());
 
     // Create application state
     let app_state = AppState::new(
@@ -173,11 +170,10 @@ async fn main() -> Result<()> {
     );
 
     // Get API key from environment
-    let api_key = std::env::var("API_KEY")
-        .unwrap_or_else(|_| {
-            tracing::warn!("API_KEY not set, using default (insecure for production!)");
-            "dev-api-key-change-in-production".to_string()
-        });
+    let api_key = std::env::var("API_KEY").unwrap_or_else(|_| {
+        tracing::warn!("API_KEY not set, using default (insecure for production!)");
+        "dev-api-key-change-in-production".to_string()
+    });
 
     // Configure CORS
     let cors = CorsLayer::new()
@@ -198,26 +194,26 @@ async fn main() -> Result<()> {
     // 4. Authentication
     // 5. Rate Limiting (optional, can be disabled for performance testing)
     // 6. Request ID (outermost)
-    
+
     // Check if rate limiting should be disabled (for performance testing)
     let disable_rate_limit = std::env::var("DISABLE_RATE_LIMIT")
         .ok()
         .and_then(|v| v.parse::<bool>().ok())
         .unwrap_or(false);
-    
+
     let mut app = build_router(app_state)
         .layer(CompressionLayer::new())
         .layer(cors)
         .layer(trace)
         .layer(AuthLayer::new(api_key));
-    
+
     if !disable_rate_limit {
         app = app.layer(RateLimitLayer::from_env());
         tracing::info!("Rate limiting enabled");
     } else {
         tracing::warn!("Rate limiting DISABLED - only use for performance testing!");
     }
-    
+
     let app = app.layer(RequestIdLayer);
 
     // Get server configuration
@@ -244,7 +240,10 @@ async fn main() -> Result<()> {
             .and_then(|v| v.parse().ok())
             .unwrap_or(30);
 
-        tracing::info!("Waiting up to {} seconds for in-flight requests to complete", shutdown_timeout_secs);
+        tracing::info!(
+            "Waiting up to {} seconds for in-flight requests to complete",
+            shutdown_timeout_secs
+        );
         tokio::time::sleep(std::time::Duration::from_secs(shutdown_timeout_secs)).await;
         tracing::info!("Graceful shutdown complete");
     };

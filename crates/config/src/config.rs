@@ -1,6 +1,6 @@
+use crate::error::{ConfigError, Result};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use crate::error::{ConfigError, Result};
 
 /// Main application configuration
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -375,26 +375,28 @@ impl AppConfig {
         }
 
         // Validate algorithm weights
-        let weight_sum = self.algorithms.collaborative_weight + self.algorithms.content_based_weight;
+        let weight_sum =
+            self.algorithms.collaborative_weight + self.algorithms.content_based_weight;
         if (weight_sum - 1.0).abs() > 0.001 {
-            return Err(ConfigError::ValidationError(
-                format!(
-                    "Algorithm weights must sum to 1.0, got {}",
-                    weight_sum
-                ),
-            ));
+            return Err(ConfigError::ValidationError(format!(
+                "Algorithm weights must sum to 1.0, got {}",
+                weight_sum
+            )));
         }
-        if self.algorithms.collaborative_weight < 0.0 || self.algorithms.collaborative_weight > 1.0 {
+        if self.algorithms.collaborative_weight < 0.0 || self.algorithms.collaborative_weight > 1.0
+        {
             return Err(ConfigError::ValidationError(
                 "Collaborative weight must be between 0.0 and 1.0".to_string(),
             ));
         }
-        if self.algorithms.content_based_weight < 0.0 || self.algorithms.content_based_weight > 1.0 {
+        if self.algorithms.content_based_weight < 0.0 || self.algorithms.content_based_weight > 1.0
+        {
             return Err(ConfigError::ValidationError(
                 "Content-based weight must be between 0.0 and 1.0".to_string(),
             ));
         }
-        if self.algorithms.similarity_threshold < 0.0 || self.algorithms.similarity_threshold > 1.0 {
+        if self.algorithms.similarity_threshold < 0.0 || self.algorithms.similarity_threshold > 1.0
+        {
             return Err(ConfigError::ValidationError(
                 "Similarity threshold must be between 0.0 and 1.0".to_string(),
             ));
@@ -541,7 +543,13 @@ mod tests {
     #[test]
     fn test_model_update_interval_conversions() {
         let config = AppConfig::default();
-        assert_eq!(config.incremental_update_interval(), Duration::from_secs(10));
-        assert_eq!(config.full_rebuild_interval(), Duration::from_secs(24 * 3600));
+        assert_eq!(
+            config.incremental_update_interval(),
+            Duration::from_secs(10)
+        );
+        assert_eq!(
+            config.full_rebuild_interval(),
+            Duration::from_secs(24 * 3600)
+        );
     }
 }

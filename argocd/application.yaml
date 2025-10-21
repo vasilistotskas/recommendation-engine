@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: recommendation-engine
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/grooveshop/recommendation-engine.git
+    targetRevision: main
+    path: helm/recommendation-engine
+    helm:
+      valueFiles:
+        - values-prod.yaml
+      # Override specific values here if needed
+      # parameters:
+      #   - name: image.tag
+      #     value: "1.0.0"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: recommendation-engine
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  # Health check configuration
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recommendation-engine-config
+  labels:
+    app: recommendation-engine
+data:
+  # Logging configuration
+  log_level: "info"
+  rust_backtrace: "0"
+
+  # Algorithm weights (must sum to 1.0)
+  collaborative_weight: "0.6"
+  content_weight: "0.4"
+
+  # Cache TTL (in seconds)
+  cache_ttl_recommendations: "300"  # 5 minutes
+  cache_ttl_trending: "3600"        # 1 hour
+  cache_ttl_user_profile: "600"     # 10 minutes
+
+  # Rate limiting
+  rate_limit_requests: "1000"
+  rate_limit_window_secs: "60"
+
+  # Model update intervals (in seconds)
+  update_interval_user_similarity: "10"
+  update_interval_entity_similarity: "5"
+  update_interval_trending: "3600"
+  full_rebuild_interval: "86400"    # 24 hours
+
+  # Recommendation parameters
+  default_recommendation_count: "10"
+  similarity_threshold: "0.3"
+  cold_start_min_interactions: "5"
+
+  # Performance tuning
+  db_pool_max_connections: "20"
+  db_pool_min_connections: "5"
+  redis_pool_max_connections: "10"
+
+  # Feature extraction
+  max_attribute_depth: "3"
+  vector_dimension: "128"

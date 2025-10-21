@@ -31,10 +31,16 @@ mod tests {
     #[test]
     fn test_entity_creation() {
         let mut attributes = HashMap::new();
-        attributes.insert("name".to_string(), AttributeValue::String("Test Product".to_string()));
+        attributes.insert(
+            "name".to_string(),
+            AttributeValue::String("Test Product".to_string()),
+        );
         attributes.insert("price".to_string(), AttributeValue::Number(99.99));
         attributes.insert("in_stock".to_string(), AttributeValue::Boolean(true));
-        attributes.insert("tags".to_string(), AttributeValue::Array(vec!["new".to_string(), "sale".to_string()]));
+        attributes.insert(
+            "tags".to_string(),
+            AttributeValue::Array(vec!["new".to_string(), "sale".to_string()]),
+        );
 
         let entity = Entity {
             entity_id: "prod_123".to_string(),
@@ -55,7 +61,10 @@ mod tests {
     #[test]
     fn test_entity_serialization() {
         let mut attributes = HashMap::new();
-        attributes.insert("name".to_string(), AttributeValue::String("Laptop".to_string()));
+        attributes.insert(
+            "name".to_string(),
+            AttributeValue::String("Laptop".to_string()),
+        );
         attributes.insert("price".to_string(), AttributeValue::Number(1299.99));
 
         let entity = Entity {

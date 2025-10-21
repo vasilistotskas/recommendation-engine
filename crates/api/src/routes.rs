@@ -1,8 +1,8 @@
-use axum::{
-    routing::{get, post, put, delete},
-    Router,
-};
 use crate::state::AppState;
+use axum::{
+    Router,
+    routing::{delete, get, post, put},
+};
 
 /// Build the complete API router with all endpoints
 pub fn build_router(state: AppState) -> Router {
@@ -43,32 +43,65 @@ fn entity_routes() -> Router<AppState> {
 fn interaction_routes() -> Router<AppState> {
     Router::new()
         .route("/", post(crate::handlers::interaction::create_interaction))
-        .route("/user/{id}", get(crate::handlers::interaction::get_user_interactions))
-        .route("/bulk", post(crate::handlers::interaction::bulk_import_interactions))
+        .route(
+            "/user/{id}",
+            get(crate::handlers::interaction::get_user_interactions),
+        )
+        .route(
+            "/bulk",
+            post(crate::handlers::interaction::bulk_import_interactions),
+        )
 }
 
 /// Recommendation routes
 fn recommendation_routes() -> Router<AppState> {
     Router::new()
-        .route("/user/{id}", get(crate::handlers::recommendation::get_user_recommendations))
-        .route("/entity/{id}", get(crate::handlers::recommendation::get_similar_entities))
-        .route("/trending", get(crate::handlers::recommendation::get_trending_entities))
+        .route(
+            "/user/{id}",
+            get(crate::handlers::recommendation::get_user_recommendations),
+        )
+        .route(
+            "/entity/{id}",
+            get(crate::handlers::recommendation::get_similar_entities),
+        )
+        .route(
+            "/trending",
+            get(crate::handlers::recommendation::get_trending_entities),
+        )
 }
 
 /// Export routes
 fn export_routes() -> Router<AppState> {
     Router::new()
         .route("/entities", get(crate::handlers::export::export_entities))
-        .route("/interactions", get(crate::handlers::export::export_interactions))
+        .route(
+            "/interactions",
+            get(crate::handlers::export::export_interactions),
+        )
         .route("/users", get(crate::handlers::export::export_users))
 }
 
 /// Interaction type registry routes
 fn interaction_type_routes() -> Router<AppState> {
     Router::new()
-        .route("/", post(crate::handlers::interaction_type::register_interaction_type))
-        .route("/", get(crate::handlers::interaction_type::list_interaction_types))
-        .route("/{type}", get(crate::handlers::interaction_type::get_interaction_type))
-        .route("/{type}", put(crate::handlers::interaction_type::update_interaction_type))
-        .route("/{type}", delete(crate::handlers::interaction_type::delete_interaction_type))
+        .route(
+            "/",
+            post(crate::handlers::interaction_type::register_interaction_type),
+        )
+        .route(
+            "/",
+            get(crate::handlers::interaction_type::list_interaction_types),
+        )
+        .route(
+            "/{type}",
+            get(crate::handlers::interaction_type::get_interaction_type),
+        )
+        .route(
+            "/{type}",
+            put(crate::handlers::interaction_type::update_interaction_type),
+        )
+        .route(
+            "/{type}",
+            delete(crate::handlers::interaction_type::delete_interaction_type),
+        )
 }
