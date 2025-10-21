@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #2c3e50; }
+      .subtitle { font: 14px sans-serif; fill: #34495e; }
+      .crate-name { font: bold 16px sans-serif; fill: white; }
+      .module-name { font: 13px sans-serif; fill: #2c3e50; }
+      .desc { font: 11px sans-serif; fill: #7f8c8d; }
+      .api-crate { fill: #3498db; stroke: #2980b9; stroke-width: 3; }
+      .service-crate { fill: #2ecc71; stroke: #27ae60; stroke-width: 3; }
+      .engine-crate { fill: #e74c3c; stroke: #c0392b; stroke-width: 3; }
+      .storage-crate { fill: #f39c12; stroke: #d68910; stroke-width: 3; }
+      .models-crate { fill: #9b59b6; stroke: #8e44ad; stroke-width: 3; }
+      .module-box { fill: #ecf0f1; stroke: #95a5a6; stroke-width: 1; }
+      .dependency { stroke: #34495e; stroke-width: 2; fill: none; marker-end: url(#dep-arrow); }
+    </style>
+    <marker id="dep-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#34495e" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" class="title">Crate Architecture - Layered Design</text>
+  <text x="600" y="65" text-anchor="middle" class="subtitle">Workspace with 5 Crates (Rust Edition 2024)</text>
+  
+  <!-- API Crate -->
+  <rect x="400" y="100" width="400" height="120" rx="8" class="api-crate"/>
+  <text x="600" y="130" text-anchor="middle" class="crate-name">crates/api</text>
+  <rect x="410" y="145" width="180" height="60" rx="4" class="module-box"/>
+  <text x="500" y="165" text-anchor="middle" class="module-name">HTTP Layer</text>
+  <text x="420" y="185" class="desc">• axum routes</text>
+  <text x="420" y="200" class="desc">• middleware</text>
+  <rect x="610" y="145" width="180" height="60" rx="4" class="module-box"/>
+  <text x="700" y="165" text-anchor="middle" class="module-name">Handlers</text>
+  <text x="620" y="185" class="desc">• request validation</text>
+  <text x="620" y="200" class="desc">• response mapping</text>
+  
+  <!-- Service Crate -->
+  <rect x="400" y="260" width="400" height="120" rx="8" class="service-crate"/>
+  <text x="600" y="290" text-anchor="middle" class="crate-name">crates/service</text>
+  <rect x="410" y="305" width="180" height="60" rx="4" class="module-box"/>
+  <text x="500" y="325" text-anchor="middle" class="module-name">Business Logic</text>
+  <text x="420" y="345" class="desc">• orchestration</text>
+  <text x="420" y="360" class="desc">• validation</text>
+  <rect x="610" y="305" width="180" height="60" rx="4" class="module-box"/>
+  <text x="700" y="325" text-anchor="middle" class="module-name">Services</text>
+  <text x="620" y="345" class="desc">• entity service</text>
+  <text x="620" y="360" class="desc">• recommendation service</text>
+  
+  <!-- Engine Crate -->
+  <rect x="400" y="420" width="400" height="140" rx="8" class="engine-crate"/>
+  <text x="600" y="450" text-anchor="middle" class="crate-name">crates/engine</text>
+  <rect x="410" y="465" width="120" height="80" rx="4" class="module-box"/>
+  <text x="470" y="485" text-anchor="middle" class="module-name">Collaborative</text>
+  <text x="420" y="505" class="desc">• user-based</text>
+  <text x="420" y="520" class="desc">• item-based</text>
+  <text x="420" y="535" class="desc">• matrix fact.</text>
+  <rect x="545" y="465" width="120" height="80" rx="4" class="module-box"/>
+  <text x="605" y="485" text-anchor="middle" class="module-name">Content</text>
+  <text x="555" y="505" class="desc">• vector sim.</text>
+  <text x="555" y="520" class="desc">• feature</text>
+  <text x="555" y="535" class="desc">• matching</text>
+  <rect x="680" y="465" width="110" height="80" rx="4" class="module-box"/>
+  <text x="735" y="485" text-anchor="middle" class="module-name">Hybrid</text>
+  <text x="690" y="505" class="desc">• weighted</text>
+  <text x="690" y="520" class="desc">• ensemble</text>
+  <text x="690" y="535" class="desc">• blending</text>
+  
+  <!-- Storage Crate -->
+  <rect x="100" y="600" width="400" height="120" rx="8" class="storage-crate"/>
+  <text x="300" y="630" text-anchor="middle" class="crate-name">crates/storage</text>
+  <rect x="110" y="645" width="180" height="60" rx="4" class="module-box"/>
+  <text x="200" y="665" text-anchor="middle" class="module-name">Database (sqlx)</text>
+  <text x="120" y="685" class="desc">• PostgreSQL</text>
+  <text x="120" y="700" class="desc">• migrations</text>
+  <rect x="310" y="645" width="180" height="60" rx="4" class="module-box"/>
+  <text x="400" y="665" text-anchor="middle" class="module-name">Cache (redis)</text>
+  <text x="320" y="685" class="desc">• connection pool</text>
+  <text x="320" y="700" class="desc">• TTL management</text>
+  
+  <!-- Models Crate -->
+  <rect x="700" y="600" width="400" height="120" rx="8" class="models-crate"/>
+  <text x="900" y="630" text-anchor="middle" class="crate-name">crates/models</text>
+  <rect x="710" y="645" width="180" height="60" rx="4" class="module-box"/>
+  <text x="800" y="665" text-anchor="middle" class="module-name">Domain Models</text>
+  <text x="720" y="685" class="desc">• Entity, Interaction</text>
+  <text x="720" y="700" class="desc">• UserProfile</text>
+  <rect x="910" y="645" width="180" height="60" rx="4" class="module-box"/>
+  <text x="1000" y="665" text-anchor="middle" class="module-name">DTOs</text>
+  <text x="920" y="685" class="desc">• API requests</text>
+  <text x="920" y="700" class="desc">• responses</text>
+  
+  <!-- Dependencies -->
+  <path d="M 600 220 L 600 260" class="dependency"/>
+  <path d="M 600 380 L 600 420" class="dependency"/>
+  <path d="M 550 560 L 350 600" class="dependency"/>
+  <path d="M 650 560 L 850 600" class="dependency"/>
+  
+  <path d="M 400 320 L 300 600" class="dependency"/>
+  <path d="M 800 320 L 900 600" class="dependency"/>
+  <path d="M 400 480 L 300 600" class="dependency"/>
+  <path d="M 800 480 L 900 600" class="dependency"/>
+  
+  <!-- Legend -->
+  <rect x="50" y="760" width="1100" height="110" rx="5" class="module-box"/>
+  <text x="600" y="785" text-anchor="middle" class="subtitle" style="font-weight: bold;">Dependency Flow: API → Service → Engine → Storage/Models</text>
+  
+  <text x="70" y="815" class="desc">• All crates depend on models (shared types)</text>
+  <text x="70" y="835" class="desc">• Engine and Service depend on storage for data access</text>
+  <text x="70" y="855" class="desc">• Clean separation: each layer has single responsibility</text>
+  
+  <text x="650" y="815" class="desc">• Workspace resolver = "2" (Cargo Edition 2021+)</text>
+  <text x="650" y="835" class="desc">• Shared dependencies via workspace.dependencies</text>
+  <text x="650" y="855" class="desc">• Rust Edition 2024, version 1.90+</text>
+</svg>

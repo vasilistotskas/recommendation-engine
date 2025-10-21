@@ -1,0 +1,13 @@
+[build]
+# Use all available CPU cores for compilation
+jobs = 4
+
+[target.x86_64-pc-windows-msvc]
+# Windows-specific linker settings
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[alias]
+# Useful cargo aliases
+dev = "run --bin recommendation-api"
+test-all = "test --workspace"
+check-all = "check --workspace"

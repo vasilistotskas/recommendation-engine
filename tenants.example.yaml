@@ -1,0 +1,54 @@
+# Example tenant configuration file
+# This file demonstrates per-tenant configuration overrides
+
+tenant_a:
+  tenant_id: "tenant_a"
+  algorithms:
+    collaborative_weight: 0.7
+    content_based_weight: 0.3
+    similarity_threshold: 0.6
+    default_recommendation_count: 15
+    max_recommendation_count: 50
+  cache:
+    recommendation_ttl_secs: 600    # 10 minutes
+    trending_ttl_secs: 7200         # 2 hours
+    user_preference_ttl_secs: 1200  # 20 minutes
+    entity_feature_ttl_secs: 7200   # 2 hours
+  cold_start:
+    min_interactions: 3
+    trending_window_days: 14
+    popular_entities_count: 50
+  interaction_weights:
+    view: 1.0
+    add_to_cart: 3.0
+    purchase: 5.0
+    like: 2.0
+    rating: 4.0
+
+tenant_b:
+  tenant_id: "tenant_b"
+  algorithms:
+    collaborative_weight: 0.5
+    content_based_weight: 0.5
+    similarity_threshold: 0.4
+    default_recommendation_count: 20
+    max_recommendation_count: 100
+  cache:
+    recommendation_ttl_secs: 180    # 3 minutes
+    trending_ttl_secs: 1800         # 30 minutes
+    user_preference_ttl_secs: 300   # 5 minutes
+    entity_feature_ttl_secs: 1800   # 30 minutes
+  interaction_weights:
+    view: 0.5
+    click: 1.0
+    share: 4.0
+    bookmark: 3.0
+
+tenant_c:
+  tenant_id: "tenant_c"
+  # Minimal override - only change interaction weights
+  interaction_weights:
+    read: 1.0
+    comment: 3.0
+    upvote: 2.0
+    downvote: -1.0

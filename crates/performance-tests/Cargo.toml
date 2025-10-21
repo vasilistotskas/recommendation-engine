@@ -1,0 +1,54 @@
+[package]
+name = "recommendation-performance-tests"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "performance-validator"
+path = "src/main.rs"
+
+[dependencies]
+# Workspace dependencies
+recommendation-models = { path = "../models" }
+recommendation-storage = { path = "../storage" }
+recommendation-service = { path = "../service" }
+recommendation-engine = { path = "../engine" }
+recommendation-config = { path = "../config" }
+
+# Async runtime
+tokio.workspace = true
+futures.workspace = true
+
+# HTTP client
+reqwest.workspace = true
+
+# Error handling
+anyhow.workspace = true
+thiserror.workspace = true
+
+# Utilities
+chrono.workspace = true
+uuid.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Statistics
+hdrhistogram = "7.5"
+
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+
+# Progress bar
+indicatif = "0.17"
+
+# Colored output
+colored = "2.1"
+
+# System info
+sysinfo = "0.33"

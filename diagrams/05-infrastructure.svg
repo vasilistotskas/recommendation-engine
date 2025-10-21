@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #2c3e50; }
+      .subtitle { font: 14px sans-serif; fill: #34495e; }
+      .component-title { font: bold 16px sans-serif; fill: white; }
+      .text-white { font: 12px sans-serif; fill: white; }
+      .text-dark { font: 12px sans-serif; fill: #2c3e50; }
+      .small { font: 11px sans-serif; fill: #7f8c8d; }
+      .app-box { fill: #3498db; stroke: #2980b9; stroke-width: 3; }
+      .db-box { fill: #9b59b6; stroke: #8e44ad; stroke-width: 3; }
+      .cache-box { fill: #e67e22; stroke: #d35400; stroke-width: 3; }
+      .network-box { fill: #ecf0f1; stroke: #95a5a6; stroke-width: 2; }
+      .docker-box { fill: #2c3e50; stroke: #34495e; stroke-width: 2; }
+      .connection { stroke: #34495e; stroke-width: 2; fill: none; }
+      .port-label { font: 11px monospace; fill: #e74c3c; font-weight: bold; }
+    </style>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" class="title">Infrastructure &amp; Deployment Architecture</text>
+  <text x="600" y="65" text-anchor="middle" class="subtitle">Docker Compose Setup with Multi-Container Orchestration</text>
+  
+  <!-- Docker Compose Container -->
+  <rect x="50" y="100" width="1100" height="750" rx="10" class="docker-box"/>
+  <text x="600" y="130" text-anchor="middle" class="component-title">Docker Compose Environment</text>
+  
+  <!-- Load Balancer / Ingress -->
+  <rect x="450" y="160" width="300" height="60" rx="5" class="network-box"/>
+  <text x="600" y="185" text-anchor="middle" class="text-dark" style="font-weight: bold;">External Access</text>
+  <text x="600" y="205" text-anchor="middle" class="small">HTTP/HTTPS Traffic</text>
+  
+  <!-- Application Instances -->
+  <g id="app-cluster">
+    <rect x="150" y="270" width="280" height="200" rx="8" class="app-box"/>
+    <text x="290" y="300" text-anchor="middle" class="component-title">Recommendation API</text>
+    <text x="290" y="325" text-anchor="middle" class="text-white">Instance 1</text>
+    
+    <rect x="170" y="340" width="240" height="110" rx="5" class="network-box"/>
+    <text x="180" y="360" class="text-dark">• axum HTTP server</text>
+    <text x="180" y="380" class="text-dark">• tokio async runtime</text>
+    <text x="180" y="400" class="text-dark">• Connection pooling</text>
+    <text x="180" y="420" class="text-dark">• Health checks</text>
+    <text x="180" y="440" class="text-dark">• Graceful shutdown</text>
+    
+    <text x="290" y="465" text-anchor="middle" class="port-label">PORT: 8080</text>
+    
+    <rect x="770" y="270" width="280" height="200" rx="8" class="app-box"/>
+    <text x="910" y="300" text-anchor="middle" class="component-title">Recommendation API</text>
+    <text x="910" y="325" text-anchor="middle" class="text-white">Instance N (Scalable)</text>
+    
+    <rect x="790" y="340" width="240" height="110" rx="5" class="network-box"/>
+    <text x="800" y="360" class="text-dark">• Stateless design</text>
+    <text x="800" y="380" class="text-dark">• Horizontal scaling</text>
+    <text x="800" y="400" class="text-dark">• Load distribution</text>
+    <text x="800" y="420" class="text-dark">• Independent instances</text>
+    
+    <text x="910" y="465" text-anchor="middle" class="port-label">PORT: 8080</text>
+  </g>
+  
+  <!-- PostgreSQL -->
+  <rect x="150" y="530" width="380" height="280" rx="8" class="db-box"/>
+  <text x="340" y="560" text-anchor="middle" class="component-title">PostgreSQL 17 + pgvector</text>
+  
+  <rect x="170" y="580" width="340" height="210" rx="5" class="network-box"/>
+  <text x="180" y="605" class="text-dark" style="font-weight: bold;">Database Features:</text>
+  <text x="190" y="630" class="text-dark">• pgvector extension (vector ops)</text>
+  <text x="190" y="650" class="text-dark">• HNSW indexes for similarity</text>
+  <text x="190" y="670" class="text-dark">• JSONB for flexible attributes</text>
+  <text x="190" y="690" class="text-dark">• Connection pooling (sqlx)</text>
+  <text x="190" y="710" class="text-dark">• Automated migrations</text>
+  
+  <text x="180" y="735" class="text-dark" style="font-weight: bold;">Volume:</text>
+  <text x="190" y="755" class="text-dark">postgres_data → /var/lib/postgresql/data</text>
+  <text x="190" y="775" class="text-dark">Health: pg_isready check</text>
+  
+  <text x="340" y="800" text-anchor="middle" class="port-label">PORT: 5432</text>
+  
+  <!-- Redis -->
+  <rect x="670" y="530" width="380" height="280" rx="8" class="cache-box"/>
+  <text x="860" y="560" text-anchor="middle" class="component-title">Redis 7 Alpine</text>
+  
+  <rect x="690" y="580" width="340" height="210" rx="5" class="network-box"/>
+  <text x="700" y="605" class="text-dark" style="font-weight: bold;">Cache Features:</text>
+  <text x="710" y="630" class="text-dark">• Session storage</text>
+  <text x="710" y="650" class="text-dark">• Recommendation caching</text>
+  <text x="710" y="670" class="text-dark">• Rate limiting data</text>
+  <text x="710" y="690" class="text-dark">• Connection manager</text>
+  <text x="710" y="710" class="text-dark">• TTL-based expiration</text>
+  
+  <text x="700" y="735" class="text-dark" style="font-weight: bold;">Configuration:</text>
+  <text x="710" y="755" class="text-dark">Lightweight Alpine image</text>
+  <text x="710" y="775" class="text-dark">Health: redis-cli ping</text>
+  
+  <text x="860" y="800" text-anchor="middle" class="port-label">PORT: 6379</text>
+  
+  <!-- Connections -->
+  <line x1="600" y1="220" x2="290" y2="270" class="connection"/>
+  <line x1="600" y1="220" x2="910" y2="270" class="connection"/>
+  
+  <line x1="290" y1="470" x2="340" y2="530" class="connection"/>
+  <line x1="910" y1="470" x2="340" y2="530" class="connection"/>
+  
+  <line x1="290" y1="470" x2="860" y2="530" class="connection"/>
+  <line x1="910" y1="470" x2="860" y2="530" class="connection"/>
+  
+  <!-- Labels -->
+  <text x="350" y="500" class="small">sqlx pool</text>
+  <text x="750" y="500" class="small">redis pool</text>
+  
+  <!-- Environment Variables Box -->
+  <rect x="100" y="850" width="450" height="30" rx="3" class="network-box"/>
+  <text x="110" y="870" class="small" style="font-weight: bold;">Config: .env file → DATABASE_URL, REDIS_URL, PORT, LOG_LEVEL</text>
+  
+  <!-- Deployment Notes -->
+  <rect x="600" y="850" width="550" height="30" rx="3" class="network-box"/>
+  <text x="610" y="870" class="small" style="font-weight: bold;">Deploy: docker-compose up -d | Scale: docker-compose up --scale api=N</text>
+</svg>

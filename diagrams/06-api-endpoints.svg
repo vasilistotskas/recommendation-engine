@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1100">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #2c3e50; }
+      .subtitle { font: 14px sans-serif; fill: #34495e; }
+      .section-title { font: bold 18px sans-serif; fill: #2c3e50; }
+      .endpoint { font: 13px monospace; fill: #2c3e50; font-weight: bold; }
+      .method-get { fill: #2ecc71; stroke: #27ae60; stroke-width: 2; }
+      .method-post { fill: #3498db; stroke: #2980b9; stroke-width: 2; }
+      .method-put { fill: #f39c12; stroke: #d68910; stroke-width: 2; }
+      .method-delete { fill: #e74c3c; stroke: #c0392b; stroke-width: 2; }
+      .method-text { font: bold 12px sans-serif; fill: white; }
+      .desc { font: 12px sans-serif; fill: #34495e; }
+      .param { font: 11px monospace; fill: #7f8c8d; }
+      .box { fill: #ecf0f1; stroke: #95a5a6; stroke-width: 2; }
+    </style>
+  </defs>
+  
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" class="title">API Endpoints Reference</text>
+  <text x="700" y="65" text-anchor="middle" class="subtitle">RESTful API with Multi-Tenancy Support</text>
+  
+  <!-- Health Checks Section -->
+  <rect x="50" y="100" width="650" height="140" rx="5" class="box"/>
+  <text x="70" y="130" class="section-title">Health &amp; Monitoring</text>
+  
+  <rect x="70" y="150" width="60" height="30" rx="3" class="method-get"/>
+  <text x="100" y="170" text-anchor="middle" class="method-text">GET</text>
+  <text x="145" y="170" class="endpoint">/health</text>
+  <text x="70" y="195" class="desc">Liveness probe - returns 200 OK if service is running</text>
+  <text x="70" y="215" class="param">Response: {"status": "healthy"}</text>
+  
+  <rect x="370" y="150" width="60" height="30" rx="3" class="method-get"/>
+  <text x="400" y="170" text-anchor="middle" class="method-text">GET</text>
+  <text x="445" y="170" class="endpoint">/ready</text>
+  <text x="370" y="195" class="desc">Readiness probe - checks DB &amp; Redis</text>
+  <text x="370" y="215" class="param">Response: {"status": "ready", "dependencies": {...}}</text>
+  
+  <!-- Entities Section -->
+  <rect x="50" y="270" width="650" height="340" rx="5" class="box"/>
+  <text x="70" y="300" class="section-title">Entity Management</text>
+  
+  <rect x="70" y="320" width="70" height="30" rx="3" class="method-post"/>
+  <text x="105" y="340" text-anchor="middle" class="method-text">POST</text>
+  <text x="155" y="340" class="endpoint">/api/v1/entities</text>
+  <text x="70" y="365" class="desc">Register a new entity with attributes and feature vector</text>
+  <text x="70" y="385" class="param">Body: {"entity_id", "entity_type", "tenant_id", "attributes", "feature_vector"}</text>
+  <text x="70" y="405" class="param">Response: 201 Created</text>
+  
+  <rect x="70" y="425" width="60" height="30" rx="3" class="method-put"/>
+  <text x="100" y="445" text-anchor="middle" class="method-text">PUT</text>
+  <text x="145" y="445" class="endpoint">/api/v1/entities/{id}?type={type}</text>
+  <text x="70" y="470" class="desc">Update entity attributes or feature vector</text>
+  <text x="70" y="490" class="param">Body: {"attributes", "feature_vector"}</text>
+  <text x="70" y="510" class="param">Response: 200 OK</text>
+  
+  <rect x="70" y="530" width="60" height="30" rx="3" class="method-get"/>
+  <text x="100" y="550" text-anchor="middle" class="method-text">GET</text>
+  <text x="145" y="550" class="endpoint">/api/v1/entities/{id}?type={type}</text>
+  <text x="70" y="575" class="desc">Retrieve entity details by ID and type</text>
+  <text x="70" y="595" class="param">Response: Entity object with all fields</text>
+  
+  <rect x="370" y="530" width="80" height="30" rx="3" class="method-delete"/>
+  <text x="410" y="550" text-anchor="middle" class="method-text">DELETE</text>
+  <text x="465" y="550" class="endpoint">/api/v1/entities/{id}?type={type}</text>
+  <text x="370" y="575" class="desc">Delete entity and related data</text>
+  <text x="370" y="595" class="param">Response: 204 No Content</text>
+  
+  <!-- Interactions Section -->
+  <rect x="750" y="100" width="600" height="240" rx="5" class="box"/>
+  <text x="770" y="130" class="section-title">Interaction Tracking</text>
+  
+  <rect x="770" y="150" width="70" height="30" rx="3" class="method-post"/>
+  <text x="805" y="170" text-anchor="middle" class="method-text">POST</text>
+  <text x="855" y="170" class="endpoint">/api/v1/interactions</text>
+  <text x="770" y="195" class="desc">Record user-entity interaction event</text>
+  <text x="770" y="215" class="param">Body: {"user_id", "entity_id", "entity_type", "interaction_type",</text>
+  <text x="790" y="235" class="param">"tenant_id", "weight", "metadata"}</text>
+  <text x="770" y="255" class="param">Types: view, click, purchase, like, share, etc.</text>
+  <text x="770" y="275" class="param">Response: 201 Created</text>
+  
+  <rect x="770" y="295" width="60" height="30" rx="3" class="method-get"/>
+  <text x="800" y="315" text-anchor="middle" class="method-text">GET</text>
+  <text x="845" y="315" class="endpoint">/api/v1/interactions/user/{id}</text>
+  <text x="770" y="340" class="desc">Get user's interaction history (paginated)</text>
+  
+  <!-- Recommendations Section -->
+  <rect x="750" y="370" width="600" height="380" rx="5" class="box"/>
+  <text x="770" y="400" class="section-title">Recommendations</text>
+  
+  <rect x="770" y="420" width="60" height="30" rx="3" class="method-get"/>
+  <text x="800" y="440" text-anchor="middle" class="method-text">GET</text>
+  <text x="845" y="440" class="endpoint">/api/v1/recommendations/user/{id}</text>
+  <text x="770" y="465" class="desc">Get personalized recommendations for user</text>
+  <text x="770" y="485" class="param">Query: ?tenant_id=X&amp;limit=20&amp;entity_type=product&amp;algorithm=hybrid</text>
+  <text x="770" y="505" class="param">Algorithms: collaborative, content, hybrid, trending</text>
+  <text x="770" y="525" class="param">Response: [{"entity_id", "score", "reason", "metadata"}]</text>
+  
+  <rect x="770" y="555" width="60" height="30" rx="3" class="method-get"/>
+  <text x="800" y="575" text-anchor="middle" class="method-text">GET</text>
+  <text x="845" y="575" class="endpoint">/api/v1/recommendations/entity/{id}</text>
+  <text x="770" y="600" class="desc">Get similar entities (content-based)</text>
+  <text x="770" y="620" class="param">Query: ?entity_type=X&amp;limit=10&amp;tenant_id=Y</text>
+  <text x="770" y="640" class="param">Uses: feature_vector similarity via HNSW index</text>
+  <text x="770" y="660" class="param">Response: [{"entity_id", "similarity_score", "attributes"}]</text>
+  
+  <rect x="770" y="690" width="60" height="30" rx="3" class="method-get"/>
+  <text x="800" y="710" text-anchor="middle" class="method-text">GET</text>
+  <text x="845" y="710" class="endpoint">/api/v1/recommendations/trending</text>
+  <text x="770" y="735" class="desc">Get trending entities (cold start fallback)</text>
+  <text x="770" y="755" class="param">Query: ?entity_type=X&amp;window=7d&amp;limit=20&amp;tenant_id=Y</text>
+  <text x="770" y="775" class="param">Cached in: trending_entities table</text>
+  <text x="770" y="795" class="param">Response: [{"entity_id", "score", "interaction_count"}]</text>
+  
+  <!-- Common Parameters Section -->
+  <rect x="50" y="640" width="650" height="200" rx="5" class="box"/>
+  <text x="70" y="670" class="section-title">Common Parameters &amp; Headers</text>
+  
+  <text x="70" y="700" class="desc" style="font-weight: bold;">Query Parameters:</text>
+  <text x="90" y="720" class="param">• tenant_id: Multi-tenancy identifier (default: "default")</text>
+  <text x="90" y="740" class="param">• limit: Max results to return (default: 20, max: 100)</text>
+  <text x="90" y="760" class="param">• offset: Pagination offset (default: 0)</text>
+  
+  <text x="70" y="790" class="desc" style="font-weight: bold;">Headers:</text>
+  <text x="90" y="810" class="param">• Content-Type: application/json</text>
+  <text x="90" y="830" class="param">• X-Tenant-ID: Alternative to query param</text>
+  
+  <!-- Response Codes Section -->
+  <rect x="50" y="870" width="650" height="200" rx="5" class="box"/>
+  <text x="70" y="900" class="section-title">HTTP Response Codes</text>
+  
+  <text x="70" y="930" class="param">• 200 OK - Successful GET/PUT request</text>
+  <text x="70" y="950" class="param">• 201 Created - Successful POST request</text>
+  <text x="70" y="970" class="param">• 204 No Content - Successful DELETE request</text>
+  <text x="70" y="990" class="param">• 400 Bad Request - Invalid input or validation error</text>
+  <text x="70" y="1010" class="param">• 404 Not Found - Entity or resource not found</text>
+  <text x="70" y="1030" class="param">• 500 Internal Server Error - Server-side error</text>
+  <text x="70" y="1050" class="param">• 503 Service Unavailable - DB or Redis connection issue</text>
+  
+  <!-- Notes -->
+  <rect x="750" y="780" width="600" height="290" rx="5" class="box"/>
+  <text x="770" y="810" class="section-title">Implementation Notes</text>
+  
+  <text x="770" y="840" class="desc" style="font-weight: bold;">Authentication &amp; Authorization:</text>
+  <text x="790" y="860" class="param">• Currently open (add JWT/API key in production)</text>
+  <text x="790" y="880" class="param">• Tenant isolation enforced at data layer</text>
+  
+  <text x="770" y="910" class="desc" style="font-weight: bold;">Rate Limiting:</text>
+  <text x="790" y="930" class="param">• Implemented via Redis (future enhancement)</text>
+  <text x="790" y="950" class="param">• Recommended: 100 req/min per tenant</text>
+  
+  <text x="770" y="980" class="desc" style="font-weight: bold;">Caching Strategy:</text>
+  <text x="790" y="1000" class="param">• Recommendations cached for 5 minutes</text>
+  <text x="790" y="1020" class="param">• Entity lookups cached for 1 hour</text>
+  <text x="790" y="1040" class="param">• Invalidation on entity/interaction updates</text>
+</svg>

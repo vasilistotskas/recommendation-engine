@@ -1,0 +1,36 @@
+[package]
+name = "recommendation-storage"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Workspace dependencies
+recommendation-models = { path = "../models" }
+
+# Database
+sqlx.workspace = true
+
+# Cache
+redis.workspace = true
+
+# Async runtime
+tokio.workspace = true
+futures.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Error handling
+thiserror.workspace = true
+anyhow.workspace = true
+
+# Utilities
+chrono.workspace = true
+uuid.workspace = true
+
+# Observability
+tracing.workspace = true

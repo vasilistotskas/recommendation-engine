@@ -1,0 +1,94 @@
+# Example configuration file for Recommendation Engine
+# This file demonstrates all available configuration options
+# Copy to config.yaml and customize for your environment
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  log_level: "info"
+
+database:
+  url: "postgresql://postgres:postgres@localhost:5432/recommendations"
+  max_connections: 20
+  min_connections: 5
+  acquire_timeout_secs: 3
+  idle_timeout_secs: 600
+  max_lifetime_secs: 1800
+
+redis:
+  url: "redis://localhost:6379"
+  pool_size: 10
+  connection_timeout_secs: 5
+
+# Hot-reloadable: Algorithm weights and thresholds
+algorithms:
+  collaborative_weight: 0.6
+  content_based_weight: 0.4
+  similarity_threshold: 0.5
+  default_recommendation_count: 10
+  max_recommendation_count: 100
+
+model_updates:
+  incremental_update_interval_secs: 10
+  full_rebuild_interval_hours: 24
+  trending_update_interval_hours: 1
+  batch_size: 1000
+
+# Hot-reloadable: Cache TTL settings
+cache:
+  recommendation_ttl_secs: 300      # 5 minutes
+  trending_ttl_secs: 3600           # 1 hour
+  user_preference_ttl_secs: 600     # 10 minutes
+  entity_feature_ttl_secs: 3600     # 1 hour
+
+authentication:
+  api_key: "your-secret-api-key-change-in-production"
+  require_api_key: true
+
+rate_limiting:
+  enabled: true
+  requests_per_minute: 1000
+  burst_size: 100
+
+observability:
+  metrics_enabled: true
+  metrics_port: 9090
+  tracing_enabled: true
+  tracing_endpoint: "http://localhost:4317"
+
+# Hot-reloadable: Cold start behavior
+cold_start:
+  min_interactions: 5
+  trending_window_days: 7
+  popular_entities_count: 100
+
+multi_tenancy:
+  default_tenant_id: "default"
+  enabled: false
+
+webhooks:
+  enabled: false
+  url: null
+  secret: null
+  retry_max_attempts: 3
+  retry_backoff_secs: 5
+
+bulk_operations:
+  import_batch_size: 1000
+  import_max_records: 100000
+  export_batch_size: 5000
+
+performance:
+  worker_threads: 4
+  max_blocking_threads: 512
+  enable_connection_pooling: true
+
+security:
+  enable_cors: true
+  cors_allowed_origins: "*"
+  enable_compression: true
+  max_request_size_mb: 10
+
+shutdown:
+  timeout_secs: 30
+  drain_requests: true

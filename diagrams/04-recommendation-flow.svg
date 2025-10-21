@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1000">
+  <defs>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #2c3e50; }
+      .subtitle { font: 14px sans-serif; fill: #34495e; }
+      .step-title { font: bold 15px sans-serif; fill: white; }
+      .step-text { font: 12px sans-serif; fill: #2c3e50; }
+      .small-text { font: 11px sans-serif; fill: #7f8c8d; }
+      .step-box { fill: #3498db; stroke: #2980b9; stroke-width: 2; }
+      .algo-box { fill: #e74c3c; stroke: #c0392b; stroke-width: 2; }
+      .data-box { fill: #f39c12; stroke: #d68910; stroke-width: 2; }
+      .result-box { fill: #2ecc71; stroke: #27ae60; stroke-width: 2; }
+      .detail-box { fill: #ecf0f1; stroke: #95a5a6; stroke-width: 1; }
+      .flow-arrow { stroke: #34495e; stroke-width: 3; fill: none; marker-end: url(#flow-head); }
+      .data-arrow { stroke: #f39c12; stroke-width: 2; fill: none; marker-end: url(#data-head); stroke-dasharray: 5,5; }
+    </style>
+    <marker id="flow-head" markerWidth="12" markerHeight="12" refX="10" refY="3" orient="auto">
+      <polygon points="0 0, 12 3, 0 6" fill="#34495e" />
+    </marker>
+    <marker id="data-head" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#f39c12" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" class="title">Recommendation Generation Flow</text>
+  <text x="700" y="65" text-anchor="middle" class="subtitle">Hybrid Algorithm with Multi-Strategy Approach</text>
+  
+  <!-- Step 1: Request -->
+  <rect x="550" y="100" width="300" height="70" rx="8" class="step-box"/>
+  <text x="700" y="125" text-anchor="middle" class="step-title">1. Incoming Request</text>
+  <text x="700" y="145" text-anchor="middle" class="small-text" style="fill: white;">GET /api/v1/recommendations/user/{id}</text>
+  <text x="700" y="162" text-anchor="middle" class="small-text" style="fill: white;">tenant_id, limit, filters</text>
+  
+  <!-- Step 2: User Profile Check -->
+  <rect x="550" y="210" width="300" height="80" rx="8" class="data-box"/>
+  <text x="700" y="235" text-anchor="middle" class="step-title">2. Load User Profile</text>
+  <text x="700" y="255" text-anchor="middle" class="small-text" style="fill: white;">Check interaction_count</text>
+  <text x="700" y="272" text-anchor="middle" class="small-text" style="fill: white;">Load preference_vector</text>
+  
+  <!-- Decision Diamond -->
+  <polygon points="700,320 780,360 700,400 620,360" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+  <text x="700" y="365" text-anchor="middle" class="step-title">Cold Start?</text>
+  
+  <!-- Cold Start Path -->
+  <rect x="100" y="450" width="280" height="100" rx="8" class="algo-box"/>
+  <text x="240" y="475" text-anchor="middle" class="step-title">3a. Cold Start Strategy</text>
+  <text x="110" y="500" class="small-text" style="fill: white;">• Trending entities (7-day window)</text>
+  <text x="110" y="520" class="small-text" style="fill: white;">• Popular by entity_type</text>
+  <text x="110" y="540" class="small-text" style="fill: white;">• Cached in trending_entities table</text>
+  
+  <!-- Warm Start Path -->
+  <rect x="450" y="450" width="800" height="280" rx="8" class="algo-box"/>
+  <text x="850" y="475" text-anchor="middle" class="step-title">3b. Hybrid Recommendation Engine</text>
+  
+  <!-- Collaborative Filtering -->
+  <rect x="470" y="495" width="230" height="110" rx="5" class="detail-box"/>
+  <text x="585" y="515" text-anchor="middle" class="step-text" style="font-weight: bold;">Collaborative Filtering</text>
+  <text x="480" y="535" class="small-text">1. Find similar users via</text>
+  <text x="490" y="552" class="small-text">preference_vector similarity</text>
+  <text x="480" y="569" class="small-text">2. Get their interactions</text>
+  <text x="480" y="586" class="small-text">3. Score by weight &amp; recency</text>
+  
+  <!-- Content-Based Filtering -->
+  <rect x="720" y="495" width="230" height="110" rx="5" class="detail-box"/>
+  <text x="835" y="515" text-anchor="middle" class="step-text" style="font-weight: bold;">Content-Based Filtering</text>
+  <text x="730" y="535" class="small-text">1. Get user's past interactions</text>
+  <text x="730" y="552" class="small-text">2. Find similar entities via</text>
+  <text x="740" y="569" class="small-text">feature_vector similarity</text>
+  <text x="730" y="586" class="small-text">3. HNSW index for fast search</text>
+  
+  <!-- Trending Boost -->
+  <rect x="970" y="495" width="260" height="110" rx="5" class="detail-box"/>
+  <text x="1100" y="515" text-anchor="middle" class="step-text" style="font-weight: bold;">Trending Boost</text>
+  <text x="980" y="535" class="small-text">1. Recent interaction spike detection</text>
+  <text x="980" y="552" class="small-text">2. Time-decay scoring</text>
+  <text x="980" y="569" class="small-text">3. Diversity injection</text>
+  
+  <!-- Hybrid Scoring -->
+  <rect x="470" y="620" width="760" height="50" rx="5" class="detail-box"/>
+  <text x="850" y="640" text-anchor="middle" class="step-text" style="font-weight: bold;">Weighted Ensemble</text>
+  <text x="850" y="658" text-anchor="middle" class="small-text">score = 0.4 × collaborative + 0.4 × content + 0.2 × trending</text>
+  
+  <!-- Step 4: Post-Processing -->
+  <rect x="450" y="760" width="500" height="90" rx="8" class="result-box"/>
+  <text x="700" y="785" text-anchor="middle" class="step-title">4. Post-Processing</text>
+  <text x="460" y="810" class="small-text" style="fill: white;">• Deduplication (remove already interacted)</text>
+  <text x="460" y="830" class="small-text" style="fill: white;">• Diversity filtering (max per category)</text>
+  <text x="460" y="850" class="small-text" style="fill: white;">• Apply business rules &amp; filters</text>
+  
+  <!-- Step 5: Response -->
+  <rect x="550" y="880" width="300" height="70" rx="8" class="step-box"/>
+  <text x="700" y="905" text-anchor="middle" class="step-title">5. Return Results</text>
+  <text x="700" y="925" text-anchor="middle" class="small-text" style="fill: white;">Ranked list with scores</text>
+  <text x="700" y="942" text-anchor="middle" class="small-text" style="fill: white;">+ metadata &amp; explanation</text>
+  
+  <!-- Flow Arrows -->
+  <path d="M 700 170 L 700 210" class="flow-arrow"/>
+  <path d="M 700 290 L 700 320" class="flow-arrow"/>
+  <path d="M 620 360 L 240 450" class="flow-arrow"/>
+  <text x="400" y="400" class="subtitle">Yes (count &lt; 5)</text>
+  <path d="M 780 360 L 850 450" class="flow-arrow"/>
+  <text x="850" y="400" class="subtitle">No (count ≥ 5)</text>
+  
+  <path d="M 240 550 L 240 800 L 450 800" class="flow-arrow"/>
+  <path d="M 850 730 L 700 760" class="flow-arrow"/>
+  <path d="M 700 850 L 700 880" class="flow-arrow"/>
+  
+  <!-- Data Access Arrows -->
+  <path d="M 100 250 L 550 250" class="data-arrow"/>
+  <text x="300" y="240" class="small-text">user_profiles</text>
+  
+  <path d="M 1300 550 L 1350 550 L 1350 250 L 850 250" class="data-arrow"/>
+  <text x="1300" y="240" class="small-text">entities, interactions</text>
+</svg>

@@ -1,0 +1,49 @@
+[package]
+name = "recommendation-api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Workspace dependencies
+recommendation-service = { path = "../service" }
+recommendation-models = { path = "../models" }
+recommendation-storage = { path = "../storage" }
+recommendation-engine = { path = "../engine" }
+recommendation-config = { path = "../config" }
+
+# Web framework
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+
+# Async runtime
+tokio.workspace = true
+futures.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Observability
+tracing.workspace = true
+tracing-subscriber.workspace = true
+metrics.workspace = true
+# metrics-exporter-prometheus.workspace = true
+
+# Error handling
+thiserror.workspace = true
+anyhow.workspace = true
+
+# Utilities
+chrono.workspace = true
+uuid.workspace = true
+
+# Validation
+validator.workspace = true
+
+# Configuration
+config.workspace = true
+dotenvy.workspace = true

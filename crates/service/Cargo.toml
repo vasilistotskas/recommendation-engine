@@ -1,0 +1,45 @@
+[package]
+name = "recommendation-service"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Workspace dependencies
+recommendation-engine = { path = "../engine" }
+recommendation-storage = { path = "../storage" }
+recommendation-models = { path = "../models" }
+
+# Async runtime
+tokio.workspace = true
+futures.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Error handling
+thiserror.workspace = true
+anyhow.workspace = true
+
+# Utilities
+chrono.workspace = true
+uuid.workspace = true
+
+# Observability
+tracing.workspace = true
+
+# HTTP client
+reqwest.workspace = true
+
+# Cryptography
+sha2 = "0.10"
+hex = "0.4"
+
+# In-memory caching for request coalescing
+moka = { version = "0.12", features = ["future"] }
+
+[dev-dependencies]
+sqlx.workspace = true

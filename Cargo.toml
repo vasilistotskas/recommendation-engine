@@ -1,0 +1,78 @@
+[workspace]
+members = [
+    "crates/api",
+    "crates/service",
+    "crates/engine",
+    "crates/storage",
+    "crates/models",
+    "crates/config",
+    "crates/integration-tests",
+    "crates/performance-tests",
+]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.90"
+authors = ["GrooveShop Team"]
+license = "MIT"
+repository = "https://github.com/grooveshop/recommendation-engine"
+
+[workspace.dependencies]
+# Web framework
+axum = "0.8.6"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace", "compression-gzip"] }
+
+# Async runtime
+tokio = { version = "1.41", features = ["full"] }
+futures = "0.3"
+
+# Database
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-native-tls", "migrate", "chrono", "uuid", "json"] }
+
+# Cache
+redis = { version = "0.32.7", features = ["tokio-comp", "connection-manager"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Configuration
+config = "0.15.18"
+dotenvy = "0.15"
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+metrics = "0.24"
+# Note: metrics-exporter-prometheus will be added in later tasks when cmake is available
+# metrics-exporter-prometheus = "0.16"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.11", features = ["v4", "serde"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "native-tls"], default-features = false }
+
+# Validation
+validator = { version = "0.20.0", features = ["derive"] }
+
+# File watching
+notify = "8.2.0"
+
+# YAML/TOML parsing
+serde_yaml = "0.9"
+toml = "0.9.8"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
