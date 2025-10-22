@@ -1,0 +1,107 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  coverage:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: recommendations
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: llvm-tools-preview
+
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-coverage-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install cargo-llvm-cov
+      run: cargo install cargo-llvm-cov --locked
+
+    - name: Generate coverage report
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/recommendations
+        REDIS_URL: redis://localhost:6379
+        TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/recommendations
+        TEST_REDIS_URL: redis://localhost:6379
+      run: |
+        cargo llvm-cov --workspace --lcov --output-path lcov.info
+
+    - name: Generate HTML coverage report
+      run: cargo llvm-cov --workspace --html
+      continue-on-error: true
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: lcov.info
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+        flags: unittests
+        name: codecov-recommendation-engine
+
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          lcov.info
+          target/llvm-cov/html/
+
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: romeovs/lcov-reporter-action@v0.3.1
+      with:
+        lcov-file: lcov.info
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        delete-old-comments: true
+
+    - name: Check coverage threshold
+      run: |
+        coverage=$(cargo llvm-cov --workspace --summary-only | grep -oP 'TOTAL.*?\K\d+\.\d+(?=%)')
+        echo "Coverage: $coverage%"
+
+        threshold=70
+        if (( $(echo "$coverage < $threshold" | bc -l) )); then
+          echo "Coverage $coverage% is below threshold $threshold%"
+          exit 1
+        fi
+      continue-on-error: true

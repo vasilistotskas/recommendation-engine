@@ -10,30 +10,31 @@ pub async fn health_check() -> impl IntoResponse {
 
 /// Readiness check endpoint (readiness probe)
 /// Returns 200 if healthy, 503 if not ready
-/// Checks PostgreSQL and Redis connections
-pub async fn readiness_check(State(_state): State<AppState>) -> impl IntoResponse {
-    // For now, return healthy if the service is running
-    // In a production system, you'd want to check:
-    // 1. Database connection (e.g., SELECT 1)
-    // 2. Redis connection (e.g., PING command)
-    // 3. Any other critical dependencies
-    //
-    // The challenge here is that the VectorStore doesn't expose the pool directly
-    // and the error types don't make it easy to distinguish connection failures
-    // from "not found" errors without more sophisticated error handling.
-    //
-    // A proper implementation would require:
-    // - Adding a health_check() method to VectorStore
-    // - Adding a health_check() method to RedisCache
-    // - Calling those methods here and aggregating the results
+/// Checks if the service is shutting down
+pub async fn readiness_check(State(state): State<AppState>) -> impl IntoResponse {
+    // Check if service is shutting down
+    if state.is_shutting_down() {
+        tracing::debug!("Readiness check failed: service is shutting down");
+        return (
+            StatusCode::SERVICE_UNAVAILABLE,
+            Json(json!({
+                "status": "unavailable",
+                "reason": "Service is shutting down",
+                "checks": {
+                    "shutdown": "in_progress"
+                }
+            })),
+        );
+    }
 
+    // Service is ready to accept traffic
     (
         StatusCode::OK,
         Json(json!({
-            "status": "healthy",
+            "status": "ready",
             "checks": {
-                "database": "ok",
-                "redis": "ok"
+                "shutdown": "not_started",
+                "service": "running"
             }
         })),
     )

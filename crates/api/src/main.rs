@@ -238,13 +238,19 @@ async fn main() -> Result<()> {
     // Start server with graceful shutdown
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
+    // Clone app_state for shutdown signal handler
+    let shutdown_state = app_state.clone();
+
     // Create graceful shutdown signal handler
-    let shutdown_signal = async {
+    let shutdown_signal = async move {
         // Wait for SIGTERM (Kubernetes shutdown signal)
         let _ = tokio::signal::ctrl_c().await;
         tracing::info!("Received shutdown signal, starting graceful shutdown...");
 
-        // Optional: Give in-flight requests time to complete
+        // Mark service as shutting down - this will make readiness probe return 503
+        shutdown_state.set_shutting_down();
+
+        // Get shutdown timeout from environment
         let shutdown_timeout_secs = std::env::var("SHUTDOWN_TIMEOUT_SECS")
             .ok()
             .and_then(|v| v.parse().ok())
@@ -254,7 +260,10 @@ async fn main() -> Result<()> {
             "Waiting up to {} seconds for in-flight requests to complete",
             shutdown_timeout_secs
         );
+
+        // Wait for in-flight requests to complete
         tokio::time::sleep(std::time::Duration::from_secs(shutdown_timeout_secs)).await;
+
         tracing::info!("Graceful shutdown complete");
     };
 

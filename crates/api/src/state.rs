@@ -2,6 +2,7 @@ use recommendation_service::{
     EntityService, InteractionService, InteractionTypeService, RecommendationService,
 };
 use recommendation_storage::{RedisCache, VectorStore};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 /// Application state shared across all handlers
@@ -15,6 +16,8 @@ pub struct AppState {
     pub redis_cache: Arc<RedisCache>,
     pub default_tenant_id: String,
     pub metrics_handle: metrics_exporter_prometheus::PrometheusHandle,
+    /// Flag to indicate if the service is shutting down
+    pub is_shutting_down: Arc<AtomicBool>,
 }
 
 impl AppState {
@@ -37,11 +40,23 @@ impl AppState {
             redis_cache,
             default_tenant_id,
             metrics_handle,
+            is_shutting_down: Arc::new(AtomicBool::new(false)),
         }
     }
 
     /// Get reference to vector store for metrics
     pub fn vector_store(&self) -> &Arc<VectorStore> {
         &self.vector_store
+    }
+
+    /// Check if the service is shutting down
+    pub fn is_shutting_down(&self) -> bool {
+        self.is_shutting_down.load(Ordering::Relaxed)
+    }
+
+    /// Mark the service as shutting down
+    pub fn set_shutting_down(&self) {
+        self.is_shutting_down.store(true, Ordering::Relaxed);
+        tracing::info!("Service marked as shutting down - readiness probe will return unhealthy");
     }
 }
