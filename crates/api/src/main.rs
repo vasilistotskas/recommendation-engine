@@ -1,6 +1,7 @@
 use anyhow::Result;
 use recommendation_api::{
     middleware::{AuthLayer, RateLimitLayer, RequestIdLayer},
+    metrics_middleware::MetricsLayer,
     routes::build_router,
     state::AppState,
 };
@@ -34,6 +35,12 @@ async fn main() -> Result<()> {
         .with(tracing_subscriber::fmt::layer().json())
         .init();
 
+    // Initialize Prometheus metrics exporter
+    let metrics_handle = metrics_exporter_prometheus::PrometheusBuilder::new()
+        .install_recorder()
+        .expect("Failed to install Prometheus recorder");
+
+    tracing::info!("Prometheus metrics exporter initialized");
     tracing::info!("Starting Recommendation Engine API");
 
     // Initialize database connection
@@ -167,6 +174,7 @@ async fn main() -> Result<()> {
         Arc::clone(&vector_store),
         Arc::clone(&redis_cache),
         default_tenant_id,
+        metrics_handle,
     );
 
     // Get API key from environment
@@ -191,9 +199,10 @@ async fn main() -> Result<()> {
     // 1. Compression (innermost)
     // 2. CORS
     // 3. Tracing
-    // 4. Authentication
-    // 5. Rate Limiting (optional, can be disabled for performance testing)
-    // 6. Request ID (outermost)
+    // 4. Metrics (track after tracing for accurate timing)
+    // 5. Authentication
+    // 6. Rate Limiting (optional, can be disabled for performance testing)
+    // 7. Request ID (outermost)
 
     // Check if rate limiting should be disabled (for performance testing)
     let disable_rate_limit = std::env::var("DISABLE_RATE_LIMIT")
@@ -205,6 +214,7 @@ async fn main() -> Result<()> {
         .layer(CompressionLayer::new())
         .layer(cors)
         .layer(trace)
+        .layer(MetricsLayer)
         .layer(AuthLayer::new(api_key));
 
     if !disable_rate_limit {

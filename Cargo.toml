@@ -47,8 +47,7 @@ dotenvy = "0.15.7"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["json", "env-filter"] }
 metrics = "0.24.2"
-# Note: metrics-exporter-prometheus will be added in later tasks when cmake is available
-# metrics-exporter-prometheus = "0.16"
+metrics-exporter-prometheus = { version = "0.17.2", default-features = false, features = ["http-listener"] }
 
 # Error handling
 thiserror = "2.0.17"

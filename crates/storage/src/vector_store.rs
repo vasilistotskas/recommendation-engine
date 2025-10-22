@@ -21,6 +21,17 @@ impl VectorStore {
         Self { pool }
     }
 
+    /// Export database pool metrics to Prometheus
+    pub fn record_pool_metrics(&self) {
+        let pool_status = self.pool.options();
+        let num_idle = self.pool.num_idle();
+
+        // Record current pool size metrics
+        metrics::gauge!("database_pool_idle_connections").set(num_idle as f64);
+        metrics::gauge!("database_pool_max_connections").set(pool_status.get_max_connections() as f64);
+        metrics::gauge!("database_pool_min_connections").set(pool_status.get_min_connections() as f64);
+    }
+
     /// Create a new entity with tenant isolation
     pub async fn create_entity(
         &self,

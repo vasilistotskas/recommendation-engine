@@ -40,11 +40,18 @@ pub async fn readiness_check(State(_state): State<AppState>) -> impl IntoRespons
 }
 
 /// Prometheus metrics endpoint
-/// TODO: Implement in task 18.3
-pub async fn metrics() -> impl IntoResponse {
+/// Returns metrics in Prometheus text format
+pub async fn metrics(State(state): State<AppState>) -> impl IntoResponse {
+    // Record database pool metrics before rendering
+    state.vector_store().record_pool_metrics();
+
+    // Render metrics from the handle
+    let metrics_output = state.metrics_handle.render();
+
     (
-        StatusCode::NOT_IMPLEMENTED,
-        "Metrics endpoint not yet implemented",
+        StatusCode::OK,
+        [("content-type", "text/plain; version=0.0.4; charset=utf-8")],
+        metrics_output,
     )
 }
 

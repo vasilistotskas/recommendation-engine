@@ -1,6 +1,7 @@
 use axum::{extract::Request, http::HeaderValue, response::Response};
 use futures::future::BoxFuture;
 use std::task::{Context, Poll};
+use std::time::{Duration, Instant};
 use tower::{Layer, Service};
 use uuid::Uuid;
 
@@ -131,9 +132,9 @@ where
     }
 
     fn call(&mut self, req: Request<B>) -> Self::Future {
-        // Skip authentication for health check endpoints
+        // Skip authentication for health check and metrics endpoints
         let path = req.uri().path();
-        if path == "/health" || path == "/ready" {
+        if path == "/health" || path == "/ready" || path == "/metrics" {
             let future = self.inner.call(req);
             return Box::pin(future);
         }
@@ -182,7 +183,6 @@ where
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
 
 /// Rate limiter configuration
 #[derive(Clone)]
@@ -301,9 +301,9 @@ where
     }
 
     fn call(&mut self, req: Request<B>) -> Self::Future {
-        // Skip rate limiting for health check endpoints
+        // Skip rate limiting for health check and metrics endpoints
         let path = req.uri().path();
-        if path == "/health" || path == "/ready" {
+        if path == "/health" || path == "/ready" || path == "/metrics" {
             let future = self.inner.call(req);
             return Box::pin(future);
         }

@@ -14,6 +14,7 @@ pub struct AppState {
     pub vector_store: Arc<VectorStore>,
     pub redis_cache: Arc<RedisCache>,
     pub default_tenant_id: String,
+    pub metrics_handle: metrics_exporter_prometheus::PrometheusHandle,
 }
 
 impl AppState {
@@ -25,6 +26,7 @@ impl AppState {
         vector_store: Arc<VectorStore>,
         redis_cache: Arc<RedisCache>,
         default_tenant_id: String,
+        metrics_handle: metrics_exporter_prometheus::PrometheusHandle,
     ) -> Self {
         Self {
             entity_service,
@@ -34,6 +36,12 @@ impl AppState {
             vector_store,
             redis_cache,
             default_tenant_id,
+            metrics_handle,
         }
+    }
+
+    /// Get reference to vector store for metrics
+    pub fn vector_store(&self) -> &Arc<VectorStore> {
+        &self.vector_store
     }
 }

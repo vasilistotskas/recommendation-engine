@@ -75,22 +75,27 @@ impl CacheMetrics {
 
     pub fn record_hit(&self) {
         self.hits.fetch_add(1, Ordering::Relaxed);
+        metrics::counter!("redis_cache_hits_total").increment(1);
     }
 
     pub fn record_miss(&self) {
         self.misses.fetch_add(1, Ordering::Relaxed);
+        metrics::counter!("redis_cache_misses_total").increment(1);
     }
 
     pub fn record_set(&self) {
         self.sets.fetch_add(1, Ordering::Relaxed);
+        metrics::counter!("redis_cache_sets_total").increment(1);
     }
 
     pub fn record_delete(&self) {
         self.deletes.fetch_add(1, Ordering::Relaxed);
+        metrics::counter!("redis_cache_deletes_total").increment(1);
     }
 
     pub fn record_error(&self) {
         self.errors.fetch_add(1, Ordering::Relaxed);
+        metrics::counter!("redis_cache_errors_total").increment(1);
     }
 
     pub fn get_hits(&self) -> u64 {
