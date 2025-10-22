@@ -2,7 +2,7 @@
 /target/
 **/*.rs.bk
 *.pdb
-Cargo.lock
+# Cargo.lock - KEPT for binary/application projects
 
 # Environment
 .env
@@ -29,13 +29,12 @@ ehthumbs.db
 # Database
 *.db
 *.sqlite
-.sqlx/
+# .sqlx/ - KEPT for offline query cache used by CI
 
 # Build artifacts
 /node_modules/
 /dist/
 /build/
-/*.lock
 
 # Coverage
 /coverage/

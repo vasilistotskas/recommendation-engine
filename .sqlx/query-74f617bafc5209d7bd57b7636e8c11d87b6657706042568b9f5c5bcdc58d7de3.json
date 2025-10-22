@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            DELETE FROM entities\n            WHERE tenant_id = $1 AND entity_id = $2 AND entity_type = $3\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "74f617bafc5209d7bd57b7636e8c11d87b6657706042568b9f5c5bcdc58d7de3"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT EXISTS (\n                SELECT 1 FROM pg_indexes \n                WHERE indexname = 'idx_entities_feature_vector_hnsw'\n            ) as exists\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "33bac5bd525581e976a0c27bab7f7cbd106905d2ec96486d7bf730d4a7a41c49"
+}
