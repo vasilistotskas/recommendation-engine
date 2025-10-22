@@ -16,7 +16,6 @@ thiserror.workspace = true
 
 # Utilities
 chrono.workspace = true
-uuid.workspace = true
 
 # Validation
 validator.workspace = true

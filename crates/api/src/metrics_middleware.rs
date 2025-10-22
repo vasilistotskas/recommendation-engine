@@ -64,14 +64,16 @@ where
                         "method" => method.clone(),
                         "path" => normalized_path.clone(),
                         "status" => status.to_string(),
-                    ).increment(1);
+                    )
+                    .increment(1);
 
                     // Record request duration
                     metrics::histogram!("http_request_duration_seconds",
                         "method" => method.clone(),
                         "path" => normalized_path.clone(),
                         "status" => status.to_string(),
-                    ).record(duration.as_secs_f64());
+                    )
+                    .record(duration.as_secs_f64());
 
                     // Track error rates
                     if status >= 400 {
@@ -79,7 +81,8 @@ where
                             "method" => method,
                             "path" => normalized_path,
                             "status" => status.to_string(),
-                        ).increment(1);
+                        )
+                        .increment(1);
                     }
                 }
                 Err(_) => {
@@ -88,13 +91,15 @@ where
                         "method" => method.clone(),
                         "path" => normalized_path.clone(),
                         "status" => "500",
-                    ).increment(1);
+                    )
+                    .increment(1);
 
                     metrics::counter!("http_requests_errors_total",
                         "method" => method,
                         "path" => normalized_path,
                         "status" => "500",
-                    ).increment(1);
+                    )
+                    .increment(1);
                 }
             }
 
@@ -139,7 +144,7 @@ fn is_uuid_or_id(s: &str) -> bool {
 
     // Check if it looks like an entity ID (e.g., "product-123", "user_456")
     if s.contains('-') || s.contains('_') {
-        let parts: Vec<&str> = s.split(|c| c == '-' || c == '_').collect();
+        let parts: Vec<&str> = s.split(['-', '_']).collect();
         if parts.len() >= 2 && parts.iter().any(|p| p.chars().all(|c| c.is_ascii_digit())) {
             return true;
         }
@@ -154,13 +159,23 @@ mod tests {
 
     #[test]
     fn test_normalize_path() {
-        assert_eq!(normalize_path("/api/v1/entities/123"), "/api/v1/entities/{id}");
-        assert_eq!(normalize_path("/api/v1/users/user-456"), "/api/v1/users/{id}");
-        assert_eq!(normalize_path("/api/v1/entities/550e8400-e29b-41d4-a716-446655440000"),
-                   "/api/v1/entities/{id}");
+        assert_eq!(
+            normalize_path("/api/v1/entities/123"),
+            "/api/v1/entities/{id}"
+        );
+        assert_eq!(
+            normalize_path("/api/v1/users/user-456"),
+            "/api/v1/users/{id}"
+        );
+        assert_eq!(
+            normalize_path("/api/v1/entities/550e8400-e29b-41d4-a716-446655440000"),
+            "/api/v1/entities/{id}"
+        );
         assert_eq!(normalize_path("/health"), "/health");
-        assert_eq!(normalize_path("/api/v1/recommendations/trending"),
-                   "/api/v1/recommendations/trending");
+        assert_eq!(
+            normalize_path("/api/v1/recommendations/trending"),
+            "/api/v1/recommendations/trending"
+        );
     }
 
     #[test]

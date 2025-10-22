@@ -262,7 +262,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg17
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
 
 steps:
   - name: Run Integration Tests

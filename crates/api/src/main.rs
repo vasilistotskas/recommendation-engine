@@ -1,7 +1,7 @@
 use anyhow::Result;
 use recommendation_api::{
-    middleware::{AuthLayer, RateLimitLayer, RequestIdLayer},
     metrics_middleware::MetricsLayer,
+    middleware::{AuthLayer, RateLimitLayer, RequestIdLayer},
     routes::build_router,
     state::AppState,
 };
@@ -210,6 +210,9 @@ async fn main() -> Result<()> {
         .and_then(|v| v.parse::<bool>().ok())
         .unwrap_or(false);
 
+    // Clone app_state for shutdown signal handler (before moving it)
+    let shutdown_state = app_state.clone();
+
     let mut app = build_router(app_state)
         .layer(CompressionLayer::new())
         .layer(cors)
@@ -237,9 +240,6 @@ async fn main() -> Result<()> {
 
     // Start server with graceful shutdown
     let listener = tokio::net::TcpListener::bind(addr).await?;
-
-    // Clone app_state for shutdown signal handler
-    let shutdown_state = app_state.clone();
 
     // Create graceful shutdown signal handler
     let shutdown_signal = async move {

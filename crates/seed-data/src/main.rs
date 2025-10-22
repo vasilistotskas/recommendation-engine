@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
 use chrono::{Duration, Utc};
 use clap::Parser;
-use fake::faker::lorem::en::{Sentence, Words};
 use fake::Fake;
+use fake::faker::lorem::en::{Sentence, Words};
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -163,16 +163,28 @@ impl SampleDataGenerator {
                 "description".to_string(),
                 AttributeValue::String(Sentence(10..20).fake::<String>()),
             );
-            attributes.insert("category".to_string(), AttributeValue::String(category.to_string()));
-            attributes.insert("brand".to_string(), AttributeValue::String(brand.to_string()));
+            attributes.insert(
+                "category".to_string(),
+                AttributeValue::String(category.to_string()),
+            );
+            attributes.insert(
+                "brand".to_string(),
+                AttributeValue::String(brand.to_string()),
+            );
             attributes.insert("price".to_string(), AttributeValue::Number(price));
             attributes.insert("rating".to_string(), AttributeValue::Number(rating));
-            attributes.insert("in_stock".to_string(), AttributeValue::Boolean(rng.random_bool(0.9)));
+            attributes.insert(
+                "in_stock".to_string(),
+                AttributeValue::Boolean(rng.random_bool(0.9)),
+            );
             attributes.insert("tags".to_string(), AttributeValue::Array(tags));
 
             if rng.random_bool(0.5) {
                 let color = colors.choose(&mut rng).unwrap();
-                attributes.insert("color".to_string(), AttributeValue::String(color.to_string()));
+                attributes.insert(
+                    "color".to_string(),
+                    AttributeValue::String(color.to_string()),
+                );
             }
 
             products.push(BulkEntityItem {
@@ -227,9 +239,18 @@ impl SampleDataGenerator {
                 "content".to_string(),
                 AttributeValue::String(Sentence(50..100).fake::<String>()),
             );
-            attributes.insert("category".to_string(), AttributeValue::String(category.to_string()));
-            attributes.insert("author".to_string(), AttributeValue::String(author.to_string()));
-            attributes.insert("read_time_minutes".to_string(), AttributeValue::Number(read_time as f64));
+            attributes.insert(
+                "category".to_string(),
+                AttributeValue::String(category.to_string()),
+            );
+            attributes.insert(
+                "author".to_string(),
+                AttributeValue::String(author.to_string()),
+            );
+            attributes.insert(
+                "read_time_minutes".to_string(),
+                AttributeValue::Number(read_time as f64),
+            );
             attributes.insert("views".to_string(), AttributeValue::Number(views as f64));
             attributes.insert("tags".to_string(), AttributeValue::Array(tags));
 
@@ -279,7 +300,15 @@ impl SampleDataGenerator {
 
             let mut metadata = HashMap::new();
             metadata.insert("source".to_string(), "web".to_string());
-            metadata.insert("device".to_string(), if rng.random_bool(0.6) { "desktop" } else { "mobile" }.to_string());
+            metadata.insert(
+                "device".to_string(),
+                if rng.random_bool(0.6) {
+                    "desktop"
+                } else {
+                    "mobile"
+                }
+                .to_string(),
+            );
 
             interactions.push(BulkInteractionItem {
                 user_id,
@@ -297,7 +326,10 @@ impl SampleDataGenerator {
         interactions
     }
 
-    async fn bulk_import_entities(&self, entities: Vec<BulkEntityItem>) -> Result<BulkImportResponse> {
+    async fn bulk_import_entities(
+        &self,
+        entities: Vec<BulkEntityItem>,
+    ) -> Result<BulkImportResponse> {
         let request = BulkImportEntitiesRequest {
             entities,
             tenant_id: self.tenant_id.clone(),
@@ -329,7 +361,10 @@ impl SampleDataGenerator {
         Ok(result)
     }
 
-    async fn bulk_import_interactions(&self, interactions: Vec<BulkInteractionItem>) -> Result<BulkImportResponse> {
+    async fn bulk_import_interactions(
+        &self,
+        interactions: Vec<BulkInteractionItem>,
+    ) -> Result<BulkImportResponse> {
         let request = BulkImportInteractionsRequest {
             interactions,
             tenant_id: self.tenant_id.clone(),
@@ -362,18 +397,30 @@ impl SampleDataGenerator {
     }
 
     async fn seed_entities(&self, entities: Vec<BulkEntityItem>, batch_size: usize) -> Result<()> {
-        println!("Seeding {} entities in batches of {}...", entities.len(), batch_size);
+        println!(
+            "Seeding {} entities in batches of {}...",
+            entities.len(),
+            batch_size
+        );
 
         let total_batches = entities.len().div_ceil(batch_size);
         let mut successful = 0;
         let mut failed = 0;
 
         for (i, chunk) in entities.chunks(batch_size).enumerate() {
-            print!("Processing batch {}/{} ({} entities)... ", i + 1, total_batches, chunk.len());
+            print!(
+                "Processing batch {}/{} ({} entities)... ",
+                i + 1,
+                total_batches,
+                chunk.len()
+            );
 
             match self.bulk_import_entities(chunk.to_vec()).await {
                 Ok(response) => {
-                    println!("✓ Success: {}/{} entities imported", response.successful, response.total_records);
+                    println!(
+                        "✓ Success: {}/{} entities imported",
+                        response.successful, response.total_records
+                    );
                     successful += response.successful;
                     failed += response.failed;
                 }
@@ -392,19 +439,35 @@ impl SampleDataGenerator {
         Ok(())
     }
 
-    async fn seed_interactions(&self, interactions: Vec<BulkInteractionItem>, batch_size: usize) -> Result<()> {
-        println!("\nSeeding {} interactions in batches of {}...", interactions.len(), batch_size);
+    async fn seed_interactions(
+        &self,
+        interactions: Vec<BulkInteractionItem>,
+        batch_size: usize,
+    ) -> Result<()> {
+        println!(
+            "\nSeeding {} interactions in batches of {}...",
+            interactions.len(),
+            batch_size
+        );
 
         let total_batches = interactions.len().div_ceil(batch_size);
         let mut successful = 0;
         let mut failed = 0;
 
         for (i, chunk) in interactions.chunks(batch_size).enumerate() {
-            print!("Processing batch {}/{} ({} interactions)... ", i + 1, total_batches, chunk.len());
+            print!(
+                "Processing batch {}/{} ({} interactions)... ",
+                i + 1,
+                total_batches,
+                chunk.len()
+            );
 
             match self.bulk_import_interactions(chunk.to_vec()).await {
                 Ok(response) => {
-                    println!("✓ Success: {}/{} interactions imported", response.successful, response.total_records);
+                    println!(
+                        "✓ Success: {}/{} interactions imported",
+                        response.successful, response.total_records
+                    );
                     successful += response.successful;
                     failed += response.failed;
                 }
@@ -439,7 +502,10 @@ async fn main() -> Result<()> {
     println!();
     println!("Configuration:");
     println!("  API URL: {}", args.api_url);
-    println!("  Tenant ID: {}", args.tenant_id.as_deref().unwrap_or("default"));
+    println!(
+        "  Tenant ID: {}",
+        args.tenant_id.as_deref().unwrap_or("default")
+    );
     println!("  Products: {}", args.num_products);
     println!("  Articles: {}", args.num_articles);
     println!("  Users: {}", args.num_users);
@@ -447,11 +513,7 @@ async fn main() -> Result<()> {
     println!("  Batch Size: {}", args.batch_size);
     println!();
 
-    let generator = SampleDataGenerator::new(
-        args.api_url,
-        args.api_key,
-        args.tenant_id,
-    );
+    let generator = SampleDataGenerator::new(args.api_url, args.api_key, args.tenant_id);
 
     // Generate sample data
     println!("Generating sample data...");
@@ -475,10 +537,14 @@ async fn main() -> Result<()> {
     all_entities.extend(products);
     all_entities.extend(articles);
 
-    generator.seed_entities(all_entities, args.batch_size).await?;
+    generator
+        .seed_entities(all_entities, args.batch_size)
+        .await?;
 
     // Seed interactions
-    generator.seed_interactions(interactions, args.batch_size).await?;
+    generator
+        .seed_interactions(interactions, args.batch_size)
+        .await?;
 
     println!();
     println!("╔═══════════════════════════════════════════════════════════╗");

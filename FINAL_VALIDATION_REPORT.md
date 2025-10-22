@@ -145,7 +145,7 @@ Ports: 5432 (PostgreSQL)
 
 Name: recommendation-redis
 Status: Up 5 hours (healthy)
-Image: redis:7-alpine
+Image: redis:8-alpine
 Ports: 6379 (Redis)
 ```
 

@@ -12,7 +12,6 @@ recommendation-service = { path = "../service" }
 recommendation-models = { path = "../models" }
 recommendation-storage = { path = "../storage" }
 recommendation-engine = { path = "../engine" }
-recommendation-config = { path = "../config" }
 
 # Web framework
 axum.workspace = true
@@ -32,18 +31,9 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 metrics.workspace = true
 metrics-exporter-prometheus.workspace = true
-
-# Error handling
-thiserror.workspace = true
 anyhow.workspace = true
 
 # Utilities
 chrono.workspace = true
 uuid.workspace = true
-
-# Validation
-validator.workspace = true
-
-# Configuration
-config.workspace = true
 dotenvy.workspace = true

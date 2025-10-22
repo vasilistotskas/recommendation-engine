@@ -273,7 +273,7 @@ jobs:
           --health-retries 5
       
       redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -281,7 +281,7 @@ jobs:
           --health-retries 5
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install Rust
         uses: actions-rs/toolchain@v1

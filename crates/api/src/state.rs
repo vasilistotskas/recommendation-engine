@@ -2,8 +2,8 @@ use recommendation_service::{
     EntityService, InteractionService, InteractionTypeService, RecommendationService,
 };
 use recommendation_storage::{RedisCache, VectorStore};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 /// Application state shared across all handlers
 #[derive(Clone)]
@@ -21,6 +21,7 @@ pub struct AppState {
 }
 
 impl AppState {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         entity_service: Arc<EntityService>,
         interaction_service: Arc<InteractionService>,

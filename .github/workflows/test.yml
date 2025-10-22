@@ -30,7 +30,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -41,7 +41,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
@@ -81,6 +81,16 @@ jobs:
     - name: Build all crates
       run: cargo build --workspace --verbose
 
+    - name: Install sqlx-cli
+      run: cargo install sqlx-cli --no-default-features --features postgres
+
+    - name: Run database migrations
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/recommendations
+      run: |
+        sqlx database create
+        sqlx migrate run
+
     - name: Run tests
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/recommendations
@@ -115,7 +125,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -126,7 +136,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
@@ -139,6 +149,16 @@ jobs:
           ~/.cargo/git
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install sqlx-cli
+      run: cargo install sqlx-cli --no-default-features --features postgres
+
+    - name: Run database migrations
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/recommendations
+      run: |
+        sqlx database create
+        sqlx migrate run
 
     - name: Build integration tests
       run: cargo build --release -p recommendation-integration-tests
@@ -158,7 +178,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Install Rust 1.90
       uses: dtolnay/rust-toolchain@1.90
