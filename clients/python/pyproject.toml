@@ -1,0 +1,98 @@
+[project]
+name = "recommendation-engine-client"
+version = "1.0.0"
+description = "Python client library for the GrooveShop Recommendation Engine"
+readme = "README.md"
+authors = [
+    { name = "GrooveShop Team", email = "support@grooveshop.com" }
+]
+requires-python = ">=3.14"
+license = { text = "MIT" }
+keywords = [
+    "recommendation",
+    "recommendation-engine",
+    "machine-learning",
+    "collaborative-filtering",
+    "content-based-filtering",
+    "python",
+    "httpx",
+    "async"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
+]
+dependencies = [
+    "httpx==0.28.1",
+    "typing-extensions==4.15.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.4.2",
+    "pytest-asyncio==1.2.0",
+    "pytest-cov==7.0.0",
+    "pytest-httpx==0.35.0",
+    "ruff==0.14.1",
+    "mypy==1.18.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/grooveshop/recommendation-engine"
+Documentation = "https://docs.grooveshop.com/recommendation-engine"
+Repository = "https://github.com/grooveshop/recommendation-engine"
+Issues = "https://github.com/grooveshop/recommendation-engine/issues"
+
+[build-system]
+requires = ["uv_build>=0.9.0,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501", # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"tests/*" = ["ARG"]        # Allow unused arguments in tests
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--strict-markers --cov=recommendation_engine_client --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-cov>=7.0.0",
+    "pytest-httpx>=0.35.0",
+    "ruff>=0.14.1",
+]
