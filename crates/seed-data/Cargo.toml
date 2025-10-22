@@ -1,0 +1,33 @@
+[package]
+name = "seed-data"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Async runtime
+tokio.workspace = true
+
+# HTTP client
+reqwest.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Error handling
+anyhow.workspace = true
+
+# Utilities
+chrono.workspace = true
+uuid.workspace = true
+
+# Random data generation
+rand = "0.9.1"
+fake = { version = "4.4.0", features = ["derive", "chrono"] }
+
+# CLI
+clap = { version = "4.5.31", features = ["derive"] }

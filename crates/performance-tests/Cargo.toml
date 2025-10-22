@@ -45,10 +45,10 @@ hdrhistogram = "7.5"
 clap = { version = "4.5", features = ["derive"] }
 
 # Progress bar
-indicatif = "0.17"
+indicatif = "0.18.1"
 
 # Colored output
-colored = "2.1"
+colored = "3.0.0"
 
 # System info
-sysinfo = "0.33"
+sysinfo = "0.37.2"
