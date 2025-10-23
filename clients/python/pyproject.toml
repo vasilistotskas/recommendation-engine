@@ -1,12 +1,12 @@
 [project]
 name = "recommendation-engine-client"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python client library for the GrooveShop Recommendation Engine"
 readme = "README.md"
 authors = [
     { name = "GrooveShop Team", email = "support@grooveshop.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 license = { text = "MIT" }
 keywords = [
     "recommendation",
@@ -23,6 +23,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
     "Typing :: Typed",
