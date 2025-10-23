@@ -146,14 +146,25 @@ All SDKs support these core operations:
 
 ### Release Checklist
 
-- [ ] All tests passing
-- [ ] Code coverage ≥80%
-- [ ] Documentation complete
-- [ ] Examples working
-- [ ] CHANGELOG updated
-- [ ] Version bumped
-- [ ] Build successful
-- [ ] Published to package registry
+#### Python SDK (v1.0.0)
+- ✅ All tests passing (13/13 tests)
+- ✅ Code coverage ≥90% (91% coverage)
+- ✅ Documentation complete
+- ✅ Examples working (2 examples)
+- ✅ CHANGELOG updated (v1.0.0 - 2025-10-22)
+- ✅ Version bumped (1.0.0)
+- ✅ Build successful (.tar.gz + .whl built)
+- ⚠️ Published to package registry (PyPI) - *Ready for publication*
+
+#### TypeScript SDK (v1.0.0)
+- ✅ All tests passing (45/45 tests)
+- ✅ Code coverage ≥90% (97.67% coverage)
+- ✅ Documentation complete
+- ✅ Examples working (1 example)
+- ✅ CHANGELOG updated (v1.0.0 - 2025-10-22)
+- ✅ Version bumped (1.0.0)
+- ✅ Build successful (dist files built)
+- ⚠️ Published to package registry (npm) - *Ready for publication*
 
 ---
 
