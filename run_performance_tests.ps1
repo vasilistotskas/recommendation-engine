@@ -3,8 +3,8 @@
 
 param(
     [string]$Url = "http://localhost:8080",
-    [int]$Entities = 10000,
-    [int]$Concurrency = 100,
+    [int]$Entities = 100000,
+    [int]$Concurrency = 1000,
     [int]$Duration = 60,
     [switch]$SkipSetup,
     [switch]$Quick

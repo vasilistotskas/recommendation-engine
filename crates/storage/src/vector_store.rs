@@ -1679,7 +1679,7 @@ impl VectorStore {
         let preference_vector = self.compute_user_preference_vector(ctx, user_id).await?;
 
         // Get interaction count
-        let interaction_count = self.get_user_interaction_count(ctx, user_id).await? as i32;
+        let interaction_count = self.get_user_interaction_count(ctx, user_id).await?;
 
         // Get last interaction timestamp
         let interactions = self.get_user_interactions(ctx, user_id, 1, 0).await?;
