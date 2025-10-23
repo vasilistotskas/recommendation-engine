@@ -14,7 +14,7 @@ This crate provides database and caching functionality for the recommendation en
 ### Prerequisites
 
 1. PostgreSQL 12+ with pgvector extension installed
-2. Redis 7+ for caching
+2. Redis 8+ for caching
 
 ### Installation
 

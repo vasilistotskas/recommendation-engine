@@ -164,8 +164,8 @@ recommendation_service.get_recommendations(
 
 ### Prerequisites
 
-- PostgreSQL 14+ with pgvector extension
-- Redis 7+
+- PostgreSQL 17+ with pgvector extension
+- Redis 8+
 - Rust 1.90+
 
 ### Commands

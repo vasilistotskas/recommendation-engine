@@ -87,7 +87,7 @@ Tenant IDs used:
 ### Prerequisites
 
 1. **PostgreSQL 14+** with pgvector extension
-2. **Redis 7+**
+2. **Redis 8+**
 3. **Rust 1.90+**
 
 ### Setup
