@@ -15,6 +15,13 @@ WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
 COPY crates ./crates
 
+# Copy SQLx offline cache and migrations (required for compile-time verification)
+COPY .sqlx ./.sqlx
+COPY migrations ./migrations
+
+# Set SQLx to offline mode (use cached query metadata)
+ENV SQLX_OFFLINE=true
+
 # Build for release
 RUN cargo build --release --bin recommendation-api
 
