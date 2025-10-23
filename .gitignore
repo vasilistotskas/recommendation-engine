@@ -48,10 +48,16 @@ ehthumbs.db
 .settings/
 .settings.local.json
 
+# Clippy
+clippy_errors.txt
+
 # AI
 .claude/
 .kiro/
 .cursor/
+
+# Dev Docker
+docker-compose.dev.yml
 
 # === Windows reserved-name tripwires (exact names at repo root) ===
 /con
