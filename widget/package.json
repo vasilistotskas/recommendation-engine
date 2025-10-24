@@ -24,8 +24,20 @@
     "personalization",
     "machine-learning"
   ],
-  "author": "GrooveShop",
+  "author": {
+    "name": "GrooveShop",
+    "url": "https://grooveshop.com"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grooveshop/recommendation-engine",
+    "directory": "widget"
+  },
+  "homepage": "https://github.com/grooveshop/recommendation-engine#readme",
+  "bugs": {
+    "url": "https://github.com/grooveshop/recommendation-engine/issues"
+  },
   "devDependencies": {
     "@types/node": "^24.9.1",
     "@typescript-eslint/eslint-plugin": "^8.46.2",

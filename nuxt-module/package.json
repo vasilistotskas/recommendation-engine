@@ -58,7 +58,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/grooveshop/recommendations"
+    "url": "https://github.com/grooveshop/recommendation-engine",
+    "directory": "nuxt-module"
+  },
+  "homepage": "https://github.com/grooveshop/recommendation-engine#readme",
+  "bugs": {
+    "url": "https://github.com/grooveshop/recommendation-engine/issues"
   },
   "author": {
     "name": "GrooveShop",

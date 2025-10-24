@@ -21,14 +21,26 @@
     "product-recommendations",
     "grooveshop"
   ],
-  "author": "GrooveShop",
+  "author": {
+    "name": "GrooveShop",
+    "url": "https://grooveshop.com"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grooveshop/recommendation-engine",
+    "directory": "widget-react"
+  },
+  "homepage": "https://github.com/grooveshop/recommendation-engine#readme",
+  "bugs": {
+    "url": "https://github.com/grooveshop/recommendation-engine/issues"
+  },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
   "dependencies": {
-    "@grooveshop/recommendations-widget": "file:../widget"
+    "@grooveshop/recommendations-widget": "^1.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.2",
