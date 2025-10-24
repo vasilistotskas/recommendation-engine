@@ -1,0 +1,181 @@
+{% comment %}
+  GrooveShop Recommendations Block
+
+  Settings:
+  - recommendation_type: Type of recommendations (similar, trending, bundle, etc.)
+  - layout: Display layout (carousel, grid, list)
+  - count: Number of products to show
+  - theme: Visual theme (light, dark, minimal)
+  - real_time: Enable real-time updates
+  - heading: Section heading text
+{% endcomment %}
+
+<div class="grooveshop-recommendations-block">
+  {% if block.settings.heading != blank %}
+    <h2 class="grooveshop-heading">{{ block.settings.heading }}</h2>
+  {% endif %}
+
+  <div
+    data-grooveshop-recommendations
+    data-type="{{ block.settings.recommendation_type }}"
+    data-layout="{{ block.settings.layout }}"
+    data-count="{{ block.settings.count }}"
+    data-theme="{{ block.settings.theme }}"
+    {% if block.settings.real_time %}data-real-time="true"{% endif %}
+    {% if template.name == 'product' %}data-product-id="{{ product.id }}"{% endif %}
+    {% if customer %}data-user-id="shopify_customer_{{ customer.id }}"{% endif %}
+  ></div>
+</div>
+
+<style>
+  .grooveshop-recommendations-block {
+    margin: 2rem 0;
+    padding: 0 1rem;
+  }
+
+  .grooveshop-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .grooveshop-recommendations-block {
+      padding: 0 2rem;
+    }
+
+    .grooveshop-heading {
+      font-size: 1.75rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "GrooveShop Recommendations",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "recommendation_type",
+      "label": "Recommendation Type",
+      "default": "similar",
+      "options": [
+        {
+          "value": "similar",
+          "label": "Similar Products"
+        },
+        {
+          "value": "trending",
+          "label": "Trending Products"
+        },
+        {
+          "value": "bundle",
+          "label": "Bundle"
+        },
+        {
+          "value": "personalized",
+          "label": "Personalized"
+        },
+        {
+          "value": "complement",
+          "label": "Complementary"
+        },
+        {
+          "value": "recently-viewed",
+          "label": "Recently Viewed"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "carousel",
+      "options": [
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        },
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "list",
+          "label": "List"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "count",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Number of Products",
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "theme",
+      "label": "Theme",
+      "default": "light",
+      "options": [
+        {
+          "value": "light",
+          "label": "Light"
+        },
+        {
+          "value": "dark",
+          "label": "Dark"
+        },
+        {
+          "value": "minimal",
+          "label": "Minimal"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "real_time",
+      "label": "Enable Real-time Updates",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "You May Also Like"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Similar Products",
+      "settings": {
+        "recommendation_type": "similar",
+        "heading": "Similar Products"
+      }
+    },
+    {
+      "name": "Trending Products",
+      "settings": {
+        "recommendation_type": "trending",
+        "heading": "Trending Now"
+      }
+    },
+    {
+      "name": "Personalized",
+      "settings": {
+        "recommendation_type": "personalized",
+        "heading": "Picked for You"
+      }
+    }
+  ]
+}
+{% endschema %}

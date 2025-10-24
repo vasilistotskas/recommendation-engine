@@ -1,0 +1,254 @@
+/**
+ * GrooveShop Recommendations Admin Styles
+ */
+
+.grooveshop-settings {
+    max-width: 1200px;
+}
+
+.grooveshop-settings-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.grooveshop-settings-main {
+    flex: 1;
+}
+
+.grooveshop-settings-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.grooveshop-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.grooveshop-card h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #1d2327;
+    border-bottom: 1px solid #dcdcde;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.grooveshop-card h3 {
+    margin-top: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #1d2327;
+    margin-bottom: 12px;
+}
+
+.grooveshop-card p.description {
+    color: #646970;
+    margin-bottom: 15px;
+}
+
+.grooveshop-card a {
+    color: #2271b1;
+    text-decoration: none;
+}
+
+.grooveshop-card a:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+/* Form table enhancements */
+.grooveshop-card .form-table {
+    margin-top: 0;
+}
+
+.grooveshop-card .form-table th {
+    padding: 15px 10px 15px 0;
+    width: 200px;
+    font-weight: 600;
+}
+
+.grooveshop-card .form-table td {
+    padding: 15px 10px;
+}
+
+.grooveshop-card .form-table input[type="text"],
+.grooveshop-card .form-table input[type="url"],
+.grooveshop-card .form-table input[type="number"],
+.grooveshop-card .form-table select {
+    font-size: 14px;
+}
+
+.grooveshop-card .form-table input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.grooveshop-card .form-table fieldset label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.grooveshop-card .form-table .description {
+    font-size: 13px;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+/* Sidebar styles */
+.grooveshop-settings-sidebar .grooveshop-card {
+    padding: 15px;
+}
+
+.grooveshop-settings-sidebar ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.grooveshop-settings-sidebar li {
+    margin-bottom: 8px;
+    color: #646970;
+}
+
+.grooveshop-settings-sidebar code {
+    display: block;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin: 8px 0;
+    font-size: 12px;
+    color: #1d2327;
+    word-break: break-all;
+}
+
+.grooveshop-settings-sidebar p strong {
+    color: #1d2327;
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.grooveshop-settings-sidebar .button {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+/* Submit button */
+.grooveshop-settings .submit {
+    margin: 0;
+    padding: 0;
+}
+
+.grooveshop-settings .submit .button-primary {
+    padding: 8px 24px;
+    height: auto;
+    font-size: 14px;
+}
+
+/* API key validation */
+.grooveshop-api-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.grooveshop-api-status.valid {
+    background: #d7f0db;
+    color: #1e4620;
+    border: 1px solid #7ad03a;
+}
+
+.grooveshop-api-status.invalid {
+    background: #fcf0f1;
+    color: #cc1818;
+    border: 1px solid #d63638;
+}
+
+.grooveshop-api-status.checking {
+    background: #f0f6fc;
+    color: #043959;
+    border: 1px solid #2271b1;
+}
+
+.grooveshop-api-status .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+}
+
+/* Loading spinner */
+.grooveshop-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: grooveshop-spin 0.6s linear infinite;
+}
+
+@keyframes grooveshop-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Preview section */
+.grooveshop-preview {
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.grooveshop-preview h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.grooveshop-preview-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 4px;
+    min-height: 200px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .grooveshop-settings-container {
+        flex-direction: column;
+    }
+
+    .grooveshop-settings-sidebar {
+        width: 100%;
+    }
+}
+
+@media (max-width: 782px) {
+    .grooveshop-card .form-table th,
+    .grooveshop-card .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+
+    .grooveshop-card .form-table th {
+        border-bottom: none;
+    }
+
+    .grooveshop-card .form-table td {
+        border-top: none;
+    }
+}

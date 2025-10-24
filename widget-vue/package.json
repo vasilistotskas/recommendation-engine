@@ -1,0 +1,40 @@
+{
+  "name": "@grooveshop/recommendations-vue",
+  "version": "1.0.0",
+  "description": "Vue 3 components for GrooveShop product recommendations",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "recommendations",
+    "ecommerce",
+    "product-recommendations",
+    "grooveshop"
+  ],
+  "author": "GrooveShop",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "dependencies": {
+    "@grooveshop/recommendations-widget": "file:../widget"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vite-plugin-dts": "^4.5.4",
+    "vue": "^3.5.22",
+    "vue-tsc": "^3.1.1"
+  }
+}

@@ -1,0 +1,35 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "grooveshop-recommendations"
+client_id = "" # Add your Shopify client ID
+application_url = "https://grooveshop-recommendations.fly.dev" # Update with your deployment URL
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,write_products,read_orders,write_script_tags,read_customers,write_themes"
+
+[auth]
+redirect_urls = [
+  "https://grooveshop-recommendations.fly.dev/auth/callback",
+  "https://grooveshop-recommendations.fly.dev/auth/shopify/callback",
+  "https://grooveshop-recommendations.fly.dev/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-01"
+
+[pos]
+embedded = false
+
+[[app_proxy]]
+url = "https://grooveshop-recommendations.fly.dev/api/proxy"
+subpath = "apps/grooveshop"
+prefix = "apps"
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "" # Add your development store URL
+
+[extension_directories]
+directories = ["extensions/*"]

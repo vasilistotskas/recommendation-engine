@@ -6,7 +6,9 @@
 
 # Environment
 .env
-.env.local
+.env.*
+!.env.example
+*.local
 
 # IDE
 .idea/
@@ -35,6 +37,53 @@ ehthumbs.db
 /node_modules/
 /dist/
 /build/
+
+# Widget build artifacts
+/widget-react/node_modules/
+/widget-react/dist/
+/widget-react/build/
+/widget-vue/node_modules/
+/widget-vue/dist/
+/widget-vue/build/
+/widget/node_modules/
+/widget/build/
+/widget/.vite/
+/widget/package-lock.json
+/widget/pnpm-lock.yaml
+/widget/yarn.lock
+
+# Nuxt Module artifacts
+/nuxt-module/node_modules/
+/nuxt-module/dist/
+/nuxt-module/.nuxt/
+/nuxt-module/playground/.nuxt/
+/nuxt-module/playground/.output/
+/nuxt-module/playground/node_modules/
+/nuxt-module/playground/.env
+/nuxt-module/*.tgz
+/nuxt-module/.output/
+/nuxt-module/package-lock.json
+
+# WordPress Plugin artifacts
+/wordpress-plugin/vendor/
+/wordpress-plugin/node_modules/
+/wordpress-plugin/composer.lock
+
+# Shopify App artifacts
+/shopify-app/node_modules/
+/shopify-app/dist/
+/shopify-app/.next/
+/shopify-app/.env.local
+/shopify-app/package-lock.json
+/shopify-app/.turbo/
+
+# Widget artifacts (generic patterns for all widget variants)
+**/widget*/node_modules/
+**/widget*/dist/
+**/widget*/.turbo/
+**/widget*/package-lock.json
+**/widget*/pnpm-lock.yaml
+**/widget*/yarn.lock
 
 # Coverage
 /coverage/

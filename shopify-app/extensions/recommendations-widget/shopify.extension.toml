@@ -1,0 +1,71 @@
+api_version = "2024-01"
+name = "recommendations-widget"
+type = "theme_app_extension"
+
+[build]
+command = ""
+path = ""
+
+[[extensions.blocks]]
+type = "app"
+name = "grooveshop-recommendations"
+handle = "grooveshop-recommendations"
+
+[extensions.blocks.settings]
+  [[extensions.blocks.settings.list]]
+  type = "select"
+  id = "recommendation_type"
+  label = "Recommendation Type"
+  default = "similar"
+  options = [
+    { label = "Similar Products", value = "similar" },
+    { label = "Trending Products", value = "trending" },
+    { label = "Bundle", value = "bundle" },
+    { label = "Personalized", value = "personalized" },
+    { label = "Complementary", value = "complement" },
+    { label = "Recently Viewed", value = "recently-viewed" },
+    { label = "Auto", value = "auto" }
+  ]
+
+  [[extensions.blocks.settings.list]]
+  type = "select"
+  id = "layout"
+  label = "Layout"
+  default = "carousel"
+  options = [
+    { label = "Carousel", value = "carousel" },
+    { label = "Grid", value = "grid" },
+    { label = "List", value = "list" }
+  ]
+
+  [[extensions.blocks.settings.list]]
+  type = "range"
+  id = "count"
+  label = "Number of Products"
+  default = 5
+  min = 1
+  max = 20
+  step = 1
+
+  [[extensions.blocks.settings.list]]
+  type = "select"
+  id = "theme"
+  label = "Theme"
+  default = "light"
+  options = [
+    { label = "Light", value = "light" },
+    { label = "Dark", value = "dark" },
+    { label = "Minimal", value = "minimal" }
+  ]
+
+  [[extensions.blocks.settings.list]]
+  type = "checkbox"
+  id = "real_time"
+  label = "Enable Real-time Updates"
+  default = false
+
+  [[extensions.blocks.settings.list]]
+  type = "text"
+  id = "heading"
+  label = "Section Heading"
+  default = "You May Also Like"

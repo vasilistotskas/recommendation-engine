@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrooveShop Recommendations Widget - Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #333;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 0.5rem;
+    }
+
+    .code-block {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: #e83e8c;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+
+    .badge-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .badge-info {
+      background: #17a2b8;
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 GrooveShop Recommendations</h1>
+      <p class="subtitle">Plug-and-play AI-powered product recommendations</p>
+      <div style="margin-top: 1rem;">
+        <span class="badge badge-success">v1.0.0</span>
+        <span class="badge badge-info">TypeScript</span>
+        <span class="badge badge-info">Vite 7</span>
+      </div>
+    </header>
+
+    <!-- Carousel Demo -->
+    <section class="section">
+      <h2 class="section-title">Carousel Layout</h2>
+      <p>Horizontal scrollable carousel with navigation arrows</p>
+
+      <div class="code-block">
+        <code>&lt;div data-grooveshop-recommendations data-product-id="6" data-count="8" data-layout="carousel"&gt;&lt;/div&gt;</code>
+      </div>
+
+      <!-- Widget will render here -->
+      <div data-grooveshop-recommendations
+           data-product-id="6"
+           data-count="8"
+           data-layout="carousel"></div>
+    </section>
+
+    <!-- Grid Demo -->
+    <section class="section">
+      <h2 class="section-title">Grid Layout</h2>
+      <p>Responsive grid layout with equal height cards</p>
+
+      <div class="code-block">
+        <code>&lt;div data-grooveshop-recommendations data-product-id="1" data-count="6" data-layout="grid"&gt;&lt;/div&gt;</code>
+      </div>
+
+      <!-- Widget will render here -->
+      <div data-grooveshop-recommendations
+           data-product-id="1"
+           data-count="6"
+           data-layout="grid"></div>
+    </section>
+
+    <!-- List Demo -->
+    <section class="section">
+      <h2 class="section-title">List Layout</h2>
+      <p>Compact list layout for sidebar placements</p>
+
+      <div class="code-block">
+        <code>&lt;div data-grooveshop-recommendations data-product-id="123" data-count="4" data-layout="list"&gt;&lt;/div&gt;</code>
+      </div>
+
+      <!-- Widget will render here -->
+      <div data-grooveshop-recommendations
+           data-product-id="123"
+           data-count="4"
+           data-layout="list"></div>
+    </section>
+
+    <!-- Auto Mode Demo -->
+    <section class="section">
+      <h2 class="section-title">Auto Mode (Smart Detection)</h2>
+      <p>Widget automatically detects product ID and page context</p>
+
+      <div class="code-block">
+        <code>&lt;div data-grooveshop-recommendations data-type="auto" data-count="5"&gt;&lt;/div&gt;</code>
+      </div>
+
+      <!-- Widget will render here -->
+      <div data-grooveshop-recommendations
+           data-type="auto"
+           data-count="5"
+           data-layout="grid"></div>
+    </section>
+
+    <footer>
+      <p>Built with ❤️ by GrooveShop | <a href="https://github.com/grooveshop/recommendations-widget">GitHub</a></p>
+    </footer>
+  </div>
+
+  <!-- Load Widget Script -->
+  <script type="module" src="/src/index.ts"
+          data-api-key="test_api_key_12345"
+          data-tenant-id="grooveshop"
+          data-api-url="http://localhost:8080"
+          data-debug="true"></script>
+</body>
+</html>
