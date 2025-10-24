@@ -2,8 +2,8 @@
  * API client for recommendation engine
  */
 
-import type { Product, TrackingEvent } from './types';
-import type { Config } from './config';
+import type { Product, TrackingEvent } from "./types";
+import type { Config } from "./config";
 
 export class ApiClient {
   private config: Config;
@@ -18,29 +18,32 @@ export class ApiClient {
   /**
    * Fetch similar products
    */
-  public async fetchSimilar(productId: string, count: number = 5): Promise<Product[]> {
+  public async fetchSimilar(
+    productId: string,
+    count: number = 5,
+  ): Promise<Product[]> {
     const cacheKey = `similar-${productId}-${count}`;
 
     // Check cache
     const cached = this.getFromCache(cacheKey);
     if (cached) {
-      this.config.log('Cache hit:', cacheKey);
+      this.config.log("Cache hit:", cacheKey);
       return cached;
     }
 
     const widgetConfig = this.config.get();
     const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/similar/${productId}?count=${count}`;
 
-    this.config.log('Fetching similar products:', url);
+    this.config.log("Fetching similar products:", url);
 
     try {
       const response = await this.fetchWithRetry(url);
-      const products = await response.json() as Product[];
+      const products = (await response.json()) as Product[];
 
       this.setCache(cacheKey, products);
       return products;
     } catch (error) {
-      this.config.error('Failed to fetch similar products:', error);
+      this.config.error("Failed to fetch similar products:", error);
       return [];
     }
   }
@@ -48,8 +51,11 @@ export class ApiClient {
   /**
    * Fetch trending products
    */
-  public async fetchTrending(count: number = 5, category?: string): Promise<Product[]> {
-    const cacheKey = `trending-${category || 'all'}-${count}`;
+  public async fetchTrending(
+    count: number = 5,
+    category?: string,
+  ): Promise<Product[]> {
+    const cacheKey = `trending-${category || "all"}-${count}`;
 
     const cached = this.getFromCache(cacheKey);
     if (cached) {
@@ -57,16 +63,16 @@ export class ApiClient {
     }
 
     const widgetConfig = this.config.get();
-    const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/trending?count=${count}${category ? `&category=${category}` : ''}`;
+    const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/trending?count=${count}${category ? `&category=${category}` : ""}`;
 
     try {
       const response = await this.fetchWithRetry(url);
-      const products = await response.json() as Product[];
+      const products = (await response.json()) as Product[];
 
       this.setCache(cacheKey, products);
       return products;
     } catch (error) {
-      this.config.error('Failed to fetch trending products:', error);
+      this.config.error("Failed to fetch trending products:", error);
       return [];
     }
   }
@@ -74,8 +80,11 @@ export class ApiClient {
   /**
    * Fetch frequently bought together (bundle) products
    */
-  public async fetchBundle(productIds: string[], count: number = 5): Promise<Product[]> {
-    const cacheKey = `bundle-${productIds.join(',')}-${count}`;
+  public async fetchBundle(
+    productIds: string[],
+    count: number = 5,
+  ): Promise<Product[]> {
+    const cacheKey = `bundle-${productIds.join(",")}-${count}`;
 
     const cached = this.getFromCache(cacheKey);
     if (cached) {
@@ -85,14 +94,14 @@ export class ApiClient {
     const widgetConfig = this.config.get();
     const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/bundle`;
 
-    this.config.log('Fetching bundle products:', productIds);
+    this.config.log("Fetching bundle products:", productIds);
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${widgetConfig.apiKey}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${widgetConfig.apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           product_ids: productIds,
@@ -104,11 +113,11 @@ export class ApiClient {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const products = await response.json() as Product[];
+      const products = (await response.json()) as Product[];
       this.setCache(cacheKey, products);
       return products;
     } catch (error) {
-      this.config.error('Failed to fetch bundle products:', error);
+      this.config.error("Failed to fetch bundle products:", error);
       return [];
     }
   }
@@ -116,7 +125,10 @@ export class ApiClient {
   /**
    * Fetch personalized recommendations for a user
    */
-  public async fetchPersonalized(userId?: string, count: number = 5): Promise<Product[]> {
+  public async fetchPersonalized(
+    userId?: string,
+    count: number = 5,
+  ): Promise<Product[]> {
     const user = userId || this.getAnonymousUserId();
     const cacheKey = `personalized-${user}-${count}`;
 
@@ -128,16 +140,16 @@ export class ApiClient {
     const widgetConfig = this.config.get();
     const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/personalized/${user}?count=${count}`;
 
-    this.config.log('Fetching personalized products for user:', user);
+    this.config.log("Fetching personalized products for user:", user);
 
     try {
       const response = await this.fetchWithRetry(url);
-      const products = await response.json() as Product[];
+      const products = (await response.json()) as Product[];
 
       this.setCache(cacheKey, products);
       return products;
     } catch (error) {
-      this.config.error('Failed to fetch personalized products:', error);
+      this.config.error("Failed to fetch personalized products:", error);
       return [];
     }
   }
@@ -145,7 +157,10 @@ export class ApiClient {
   /**
    * Fetch complementary products that go well with a product
    */
-  public async fetchComplement(productId: string, count: number = 5): Promise<Product[]> {
+  public async fetchComplement(
+    productId: string,
+    count: number = 5,
+  ): Promise<Product[]> {
     const cacheKey = `complement-${productId}-${count}`;
 
     const cached = this.getFromCache(cacheKey);
@@ -156,16 +171,16 @@ export class ApiClient {
     const widgetConfig = this.config.get();
     const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/complement/${productId}?count=${count}`;
 
-    this.config.log('Fetching complement products:', productId);
+    this.config.log("Fetching complement products:", productId);
 
     try {
       const response = await this.fetchWithRetry(url);
-      const products = await response.json() as Product[];
+      const products = (await response.json()) as Product[];
 
       this.setCache(cacheKey, products);
       return products;
     } catch (error) {
-      this.config.error('Failed to fetch complement products:', error);
+      this.config.error("Failed to fetch complement products:", error);
       return [];
     }
   }
@@ -191,14 +206,17 @@ export class ApiClient {
     const widgetConfig = this.config.get();
     const url = `${widgetConfig.apiUrl}/api/v1/recommendations/${widgetConfig.tenantId}/batch`;
 
-    this.config.log('Fetching recently viewed products:', viewedIds.slice(0, count));
+    this.config.log(
+      "Fetching recently viewed products:",
+      viewedIds.slice(0, count),
+    );
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${widgetConfig.apiKey}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${widgetConfig.apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           product_ids: viewedIds.slice(0, count),
@@ -209,11 +227,11 @@ export class ApiClient {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const products = await response.json() as Product[];
+      const products = (await response.json()) as Product[];
       this.setCache(cacheKey, products);
       return products;
     } catch (error) {
-      this.config.error('Failed to fetch recently viewed products:', error);
+      this.config.error("Failed to fetch recently viewed products:", error);
       return [];
     }
   }
@@ -225,14 +243,14 @@ export class ApiClient {
     const widgetConfig = this.config.get();
     const url = `${widgetConfig.apiUrl}/api/v1/interactions`;
 
-    this.config.log('Tracking interaction:', event);
+    this.config.log("Tracking interaction:", event);
 
     try {
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${widgetConfig.apiKey}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${widgetConfig.apiKey}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           tenant_id: widgetConfig.tenantId,
@@ -246,7 +264,7 @@ export class ApiClient {
 
       return response.ok;
     } catch (error) {
-      this.config.error('Failed to track interaction:', error);
+      this.config.error("Failed to track interaction:", error);
       return false;
     }
   }
@@ -254,16 +272,19 @@ export class ApiClient {
   /**
    * Fetch with retry logic
    */
-  private async fetchWithRetry(url: string, retries: number = 3): Promise<Response> {
+  private async fetchWithRetry(
+    url: string,
+    retries: number = 3,
+  ): Promise<Response> {
     const widgetConfig = this.config.get();
 
     for (let i = 0; i < retries; i++) {
       try {
         const response = await fetch(url, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Authorization': `Bearer ${widgetConfig.apiKey}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${widgetConfig.apiKey}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -286,7 +307,7 @@ export class ApiClient {
       }
     }
 
-    throw new Error('Max retries exceeded');
+    throw new Error("Max retries exceeded");
   }
 
   /**
@@ -316,7 +337,7 @@ export class ApiClient {
    * Get or create anonymous user ID
    */
   private getAnonymousUserId(): string {
-    const key = 'gs_anonymous_id';
+    const key = "gs_anonymous_id";
     let userId = localStorage.getItem(key);
 
     if (!userId) {
@@ -331,14 +352,14 @@ export class ApiClient {
    * Sleep helper
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Get view history from localStorage
    */
   private getViewHistory(): string[] {
-    const key = 'gs_view_history';
+    const key = "gs_view_history";
     try {
       const history = localStorage.getItem(key);
       return history ? JSON.parse(history) : [];
@@ -351,11 +372,11 @@ export class ApiClient {
    * Add product to view history
    */
   public addToViewHistory(productId: string): void {
-    const key = 'gs_view_history';
+    const key = "gs_view_history";
     const history = this.getViewHistory();
 
     // Remove if already exists
-    const filtered = history.filter(id => id !== productId);
+    const filtered = history.filter((id) => id !== productId);
 
     // Add to beginning
     filtered.unshift(productId);
@@ -366,7 +387,7 @@ export class ApiClient {
     try {
       localStorage.setItem(key, JSON.stringify(trimmed));
     } catch (error) {
-      this.config.error('Failed to save view history:', error);
+      this.config.error("Failed to save view history:", error);
     }
   }
 
@@ -375,18 +396,20 @@ export class ApiClient {
    */
   public getCartProductIds(): string[] {
     // Try common e-commerce cart patterns
-    const key = 'gs_cart_items';
+    const key = "gs_cart_items";
 
     try {
       // Custom implementation
       const cart = localStorage.getItem(key);
       if (cart) {
         const items = JSON.parse(cart);
-        return Array.isArray(items) ? items.map((item: any) => item.productId || item.id) : [];
+        return Array.isArray(items)
+          ? items.map((item: any) => item.productId || item.id)
+          : [];
       }
 
       // WooCommerce cart
-      const wooCart = localStorage.getItem('wc_cart_hash');
+      const wooCart = localStorage.getItem("wc_cart_hash");
       if (wooCart && (window as any).wc_cart_fragments) {
         // Parse WooCommerce cart fragments
         return []; // TODO: Implement WooCommerce cart parsing
@@ -400,7 +423,7 @@ export class ApiClient {
 
       return [];
     } catch (error) {
-      this.config.error('Failed to get cart items:', error);
+      this.config.error("Failed to get cart items:", error);
       return [];
     }
   }

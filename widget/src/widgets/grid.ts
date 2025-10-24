@@ -2,8 +2,8 @@
  * Grid layout renderer
  */
 
-import type { Product } from '../types';
-import { renderCard } from '../templates/card';
+import type { Product } from "../types";
+import { renderCard } from "../templates/card";
 
 export class GridWidget {
   private container: HTMLElement;
@@ -17,7 +17,7 @@ export class GridWidget {
   public render(): void {
     const html = `
       <div class="gs-grid">
-        ${this.products.map(p => renderCard(p)).join('')}
+        ${this.products.map((p) => renderCard(p)).join("")}
       </div>
     `;
 

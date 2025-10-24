@@ -2,7 +2,7 @@
  * Configuration loader
  */
 
-import type { WidgetConfig } from './types';
+import type { WidgetConfig } from "./types";
 
 export class Config {
   private config: WidgetConfig;
@@ -15,22 +15,24 @@ export class Config {
     const scriptTag = document.currentScript as HTMLScriptElement;
 
     if (!scriptTag) {
-      throw new Error('GrooveShop: Could not find script tag');
+      throw new Error("GrooveShop: Could not find script tag");
     }
 
     const apiKey = scriptTag.dataset.apiKey;
     const tenantId = scriptTag.dataset.tenantId;
 
     if (!apiKey || !tenantId) {
-      throw new Error('GrooveShop: Missing required attributes data-api-key and data-tenant-id');
+      throw new Error(
+        "GrooveShop: Missing required attributes data-api-key and data-tenant-id",
+      );
     }
 
     return {
       apiKey,
       tenantId,
-      apiUrl: scriptTag.dataset.apiUrl || 'http://localhost:8080',
-      autoTrack: scriptTag.dataset.autoTrack !== 'false',
-      debug: scriptTag.dataset.debug === 'true',
+      apiUrl: scriptTag.dataset.apiUrl || "http://localhost:8080",
+      autoTrack: scriptTag.dataset.autoTrack !== "false",
+      debug: scriptTag.dataset.debug === "true",
     };
   }
 
@@ -40,11 +42,11 @@ export class Config {
 
   public log(...args: any[]): void {
     if (this.config.debug) {
-      console.log('[GrooveShop]', ...args);
+      console.log("[GrooveShop]", ...args);
     }
   }
 
   public error(...args: any[]): void {
-    console.error('[GrooveShop]', ...args);
+    console.error("[GrooveShop]", ...args);
   }
 }

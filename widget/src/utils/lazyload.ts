@@ -7,7 +7,7 @@ export class LazyLoader {
   private images: Set<HTMLImageElement> = new Set();
 
   constructor() {
-    if ('IntersectionObserver' in window) {
+    if ("IntersectionObserver" in window) {
       this.observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -20,9 +20,9 @@ export class LazyLoader {
           });
         },
         {
-          rootMargin: '50px', // Start loading 50px before image enters viewport
+          rootMargin: "50px", // Start loading 50px before image enters viewport
           threshold: 0.01,
-        }
+        },
       );
     }
   }
@@ -33,16 +33,20 @@ export class LazyLoader {
   public observe(container: HTMLElement): void {
     if (!this.observer) {
       // Fallback: load all images immediately if IntersectionObserver not supported
-      container.querySelectorAll<HTMLImageElement>('img[data-src]').forEach((img) => {
-        this.loadImage(img);
-      });
+      container
+        .querySelectorAll<HTMLImageElement>("img[data-src]")
+        .forEach((img) => {
+          this.loadImage(img);
+        });
       return;
     }
 
-    container.querySelectorAll<HTMLImageElement>('img[data-src]').forEach((img) => {
-      this.images.add(img);
-      this.observer!.observe(img);
-    });
+    container
+      .querySelectorAll<HTMLImageElement>("img[data-src]")
+      .forEach((img) => {
+        this.images.add(img);
+        this.observer!.observe(img);
+      });
   }
 
   /**
@@ -53,18 +57,18 @@ export class LazyLoader {
     if (!src) return;
 
     img.src = src;
-    img.removeAttribute('data-src');
+    img.removeAttribute("data-src");
 
     // Add loaded class for fade-in animation
-    img.addEventListener('load', () => {
-      img.classList.add('gs-image-loaded');
+    img.addEventListener("load", () => {
+      img.classList.add("gs-image-loaded");
     });
 
     // Handle error
-    img.addEventListener('error', () => {
-      img.classList.add('gs-image-error');
+    img.addEventListener("error", () => {
+      img.classList.add("gs-image-error");
       // Set placeholder image
-      img.src = '/placeholder.png';
+      img.src = "/placeholder.png";
     });
   }
 
@@ -88,9 +92,9 @@ export class LazyLoader {
 export function setupPrefetchOnHover(container: HTMLElement): void {
   const prefetchedLinks = new Set<string>();
 
-  container.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((link) => {
+  container.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((link) => {
     link.addEventListener(
-      'mouseenter',
+      "mouseenter",
       () => {
         const href = link.href;
 
@@ -98,15 +102,15 @@ export function setupPrefetchOnHover(container: HTMLElement): void {
         if (prefetchedLinks.has(href)) return;
 
         // Create prefetch link
-        const prefetch = document.createElement('link');
-        prefetch.rel = 'prefetch';
+        const prefetch = document.createElement("link");
+        prefetch.rel = "prefetch";
         prefetch.href = href;
-        prefetch.as = 'document';
+        prefetch.as = "document";
 
         document.head.appendChild(prefetch);
         prefetchedLinks.add(href);
       },
-      { once: true }
+      { once: true },
     );
   });
 }

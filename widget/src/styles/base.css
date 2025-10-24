@@ -12,7 +12,8 @@
   --gs-border-radius: 8px;
   --gs-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   --gs-card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
-  --gs-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --gs-font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --gs-transition: all 0.3s ease;
 }
 
@@ -265,12 +266,7 @@
 }
 
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -357,7 +353,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }

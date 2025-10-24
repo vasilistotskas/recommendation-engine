@@ -2,8 +2,8 @@
  * Product card template
  */
 
-import type { Product } from '../types';
-import type { RealtimeData } from '../realtime';
+import type { Product } from "../types";
+import type { RealtimeData } from "../realtime";
 
 export function renderCard(product: Product, realtime?: RealtimeData): string {
   const {
@@ -26,10 +26,10 @@ export function renderCard(product: Product, realtime?: RealtimeData): string {
   return `
     <div class="gs-card" data-product-id="${entity_id}">
       <div class="gs-card-image-wrapper">
-        ${hasDiscount ? `<span class="gs-badge gs-badge-discount">-${discount}%</span>` : ''}
-        ${isLowStock ? `<span class="gs-badge gs-badge-stock">Only ${stock} left</span>` : ''}
+        ${hasDiscount ? `<span class="gs-badge gs-badge-discount">-${discount}%</span>` : ""}
+        ${isLowStock ? `<span class="gs-badge gs-badge-stock">Only ${stock} left</span>` : ""}
         <img
-          src="${image_url || '/placeholder.png'}"
+          src="${image_url || "/placeholder.png"}"
           alt="${escapeHtml(name)}"
           class="gs-card-image"
           loading="lazy"
@@ -38,19 +38,27 @@ export function renderCard(product: Product, realtime?: RealtimeData): string {
       ${renderSocialProof(realtime)}
       <div class="gs-card-content">
         <h3 class="gs-card-title">${escapeHtml(name)}</h3>
-        ${rating ? `
+        ${
+          rating
+            ? `
           <div class="gs-card-rating">
             <span class="gs-stars">${renderStars(rating)}</span>
-            ${review_count ? `<span class="gs-review-count">(${review_count})</span>` : ''}
+            ${review_count ? `<span class="gs-review-count">(${review_count})</span>` : ""}
           </div>
-        ` : ''}
+        `
+            : ""
+        }
         <div class="gs-card-price">
-          ${hasDiscount ? `
+          ${
+            hasDiscount
+              ? `
             <span class="gs-price-old">$${price.toFixed(2)}</span>
             <span class="gs-price-sale">$${discountedPrice.toFixed(2)}</span>
-          ` : `
+          `
+              : `
             <span class="gs-price">$${price.toFixed(2)}</span>
-          `}
+          `
+          }
         </div>
         <a href="/products/${entity_id}" class="gs-btn gs-btn-primary">
           View Product
@@ -80,14 +88,12 @@ function renderStars(rating: number): string {
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
   return (
-    '★'.repeat(fullStars) +
-    (hasHalfStar ? '☆' : '') +
-    '☆'.repeat(emptyStars)
+    "★".repeat(fullStars) + (hasHalfStar ? "☆" : "") + "☆".repeat(emptyStars)
   );
 }
 
 function escapeHtml(text: string): string {
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
@@ -96,7 +102,7 @@ function escapeHtml(text: string): string {
  * Render social proof badges for real-time data
  */
 function renderSocialProof(realtime?: RealtimeData): string {
-  if (!realtime) return '';
+  if (!realtime) return "";
 
   const badges: string[] = [];
 
@@ -128,11 +134,11 @@ function renderSocialProof(realtime?: RealtimeData): string {
     `);
   }
 
-  if (badges.length === 0) return '';
+  if (badges.length === 0) return "";
 
   return `
     <div class="gs-social-proof" data-product-id="${realtime.productId}">
-      ${badges.join('')}
+      ${badges.join("")}
     </div>
   `;
 }

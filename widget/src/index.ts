@@ -3,18 +3,18 @@
  * Main entry point
  */
 
-import './styles/base.css';
-import { Config } from './config';
-import { ApiClient } from './api';
-import type { WidgetAttributes, Product, TrackingEvent } from './types';
-import { CarouselWidget } from './widgets/carousel';
-import { GridWidget } from './widgets/grid';
-import { ListWidget } from './widgets/list';
-import { renderSkeleton } from './templates/card';
-import { RealtimeClient, type RealtimeData } from './realtime';
-import { LazyLoader, setupPrefetchOnHover } from './utils/lazyload';
-import { ABTestManager } from './utils/abtesting';
-import { AnalyticsIntegration } from './utils/analytics';
+import "./styles/base.css";
+import { Config } from "./config";
+import { ApiClient } from "./api";
+import type { WidgetAttributes, Product, TrackingEvent } from "./types";
+import { CarouselWidget } from "./widgets/carousel";
+import { GridWidget } from "./widgets/grid";
+import { ListWidget } from "./widgets/list";
+import { renderSkeleton } from "./templates/card";
+import { RealtimeClient, type RealtimeData } from "./realtime";
+import { LazyLoader, setupPrefetchOnHover } from "./utils/lazyload";
+import { ABTestManager } from "./utils/abtesting";
+import { AnalyticsIntegration } from "./utils/analytics";
 
 class GrooveShopRecommendations {
   private config!: Config;
@@ -32,7 +32,7 @@ class GrooveShopRecommendations {
       // Initialize realtime client if enabled
       const cfg = this.config.get();
       this.realtime = new RealtimeClient({
-        apiUrl: cfg.apiUrl || 'http://localhost:8080',
+        apiUrl: cfg.apiUrl || "http://localhost:8080",
         debug: cfg.debug,
       });
 
@@ -51,7 +51,7 @@ class GrooveShopRecommendations {
 
       this.init();
     } catch (error) {
-      console.error('GrooveShop Widget initialization failed:', error);
+      console.error("GrooveShop Widget initialization failed:", error);
     }
   }
 
@@ -59,20 +59,22 @@ class GrooveShopRecommendations {
    * Initialize widget
    */
   private init(): void {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => this.renderAll());
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => this.renderAll());
     } else {
       this.renderAll();
     }
 
-    this.config.log('Widget initialized');
+    this.config.log("Widget initialized");
   }
 
   /**
    * Find and render all widgets on the page
    */
   private renderAll(): void {
-    const widgets = document.querySelectorAll<HTMLElement>('[data-grooveshop-recommendations]');
+    const widgets = document.querySelectorAll<HTMLElement>(
+      "[data-grooveshop-recommendations]",
+    );
 
     this.config.log(`Found ${widgets.length} widget(s)`);
 
@@ -93,7 +95,7 @@ class GrooveShopRecommendations {
         testId,
         variants: config.variants,
       });
-      this.config.log('Registered A/B test:', testId);
+      this.config.log("Registered A/B test:", testId);
     });
   }
 
@@ -111,35 +113,35 @@ class GrooveShopRecommendations {
         attributes = { ...attributes, ...test.getConfig() };
 
         // Track impression
-        test.track('impression');
+        test.track("impression");
 
-        this.config.log('A/B test variant:', test.getVariantName());
+        this.config.log("A/B test variant:", test.getVariantName());
 
         // Track clicks later
-        element.addEventListener('click', () => {
-          test.track('click');
+        element.addEventListener("click", () => {
+          test.track("click");
         });
       } else {
-        this.config.error('A/B test not found:', attributes.testId);
+        this.config.error("A/B test not found:", attributes.testId);
       }
     }
 
     // Show loading skeleton
     element.innerHTML = this.getSkeletonHTML(attributes);
-    element.classList.add('gs-recommendations');
+    element.classList.add("gs-recommendations");
 
     try {
       // Fetch recommendations
       const products = await this.fetchRecommendations(attributes);
 
       if (products.length === 0) {
-        this.config.log('No recommendations found, hiding widget');
-        element.innerHTML = '';
+        this.config.log("No recommendations found, hiding widget");
+        element.innerHTML = "";
         return;
       }
 
       // Render layout
-      this.renderLayout(element, attributes.layout || 'grid', products);
+      this.renderLayout(element, attributes.layout || "grid", products);
 
       // Track impression
       if (this.config.get().autoTrack) {
@@ -160,10 +162,10 @@ class GrooveShopRecommendations {
       // Setup prefetch on hover
       setupPrefetchOnHover(element);
 
-      this.config.log('Widget rendered successfully');
+      this.config.log("Widget rendered successfully");
     } catch (error) {
-      this.config.error('Failed to render widget:', error);
-      element.innerHTML = ''; // Fail silently
+      this.config.error("Failed to render widget:", error);
+      element.innerHTML = ""; // Fail silently
     }
   }
 
@@ -173,11 +175,11 @@ class GrooveShopRecommendations {
   private getAttributes(element: HTMLElement): WidgetAttributes {
     return {
       productId: element.dataset.productId,
-      count: parseInt(element.dataset.count || '5', 10),
-      layout: (element.dataset.layout as any) || 'grid',
-      type: (element.dataset.type as any) || 'similar',
-      theme: (element.dataset.theme as any) || 'light',
-      realTime: element.dataset.realTime === 'true',
+      count: parseInt(element.dataset.count || "5", 10),
+      layout: (element.dataset.layout as any) || "grid",
+      type: (element.dataset.type as any) || "similar",
+      theme: (element.dataset.theme as any) || "light",
+      realTime: element.dataset.realTime === "true",
       userId: element.dataset.userId,
       testId: element.dataset.testId,
     };
@@ -186,21 +188,23 @@ class GrooveShopRecommendations {
   /**
    * Fetch recommendations based on type
    */
-  private async fetchRecommendations(attributes: WidgetAttributes): Promise<Product[]> {
+  private async fetchRecommendations(
+    attributes: WidgetAttributes,
+  ): Promise<Product[]> {
     const { type, productId, count = 5, userId } = attributes;
 
     switch (type) {
-      case 'similar':
+      case "similar":
         if (!productId) {
-          this.config.error('Product ID required for similar recommendations');
+          this.config.error("Product ID required for similar recommendations");
           return [];
         }
         return this.api.fetchSimilar(productId, count);
 
-      case 'trending':
+      case "trending":
         return this.api.fetchTrending(count);
 
-      case 'bundle':
+      case "bundle":
         const cartIds = this.api.getCartProductIds();
         if (cartIds.length === 0 && productId) {
           // Fallback to single product bundle
@@ -208,20 +212,22 @@ class GrooveShopRecommendations {
         }
         return this.api.fetchBundle(cartIds, count);
 
-      case 'personalized':
+      case "personalized":
         return this.api.fetchPersonalized(userId, count);
 
-      case 'complement':
+      case "complement":
         if (!productId) {
-          this.config.error('Product ID required for complement recommendations');
+          this.config.error(
+            "Product ID required for complement recommendations",
+          );
           return [];
         }
         return this.api.fetchComplement(productId, count);
 
-      case 'recently-viewed':
+      case "recently-viewed":
         return this.api.fetchRecentlyViewed(count);
 
-      case 'auto':
+      case "auto":
         return this.autoDetectAndFetch(count);
 
       default:
@@ -238,12 +244,12 @@ class GrooveShopRecommendations {
     const productId = this.detectProductId();
 
     if (productId) {
-      this.config.log('Auto-detected product ID:', productId);
+      this.config.log("Auto-detected product ID:", productId);
       return this.api.fetchSimilar(productId, count);
     }
 
     // Fallback to trending
-    this.config.log('No product ID detected, showing trending');
+    this.config.log("No product ID detected, showing trending");
     return this.api.fetchTrending(count);
   }
 
@@ -277,16 +283,18 @@ class GrooveShopRecommendations {
     for (const selector of metaSelectors) {
       const meta = document.querySelector(selector);
       if (meta) {
-        return meta.getAttribute('content');
+        return meta.getAttribute("content");
       }
     }
 
     // Check schema.org structured data
-    const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+    const scripts = document.querySelectorAll(
+      'script[type="application/ld+json"]',
+    );
     for (const script of Array.from(scripts)) {
       try {
-        const data = JSON.parse(script.textContent || '');
-        if (data['@type'] === 'Product' && data.productID) {
+        const data = JSON.parse(script.textContent || "");
+        if (data["@type"] === "Product" && data.productID) {
           return data.productID;
         }
       } catch {
@@ -303,18 +311,18 @@ class GrooveShopRecommendations {
   private renderLayout(
     container: HTMLElement,
     layout: string,
-    products: Product[]
+    products: Product[],
   ): void {
     switch (layout) {
-      case 'carousel':
+      case "carousel":
         new CarouselWidget(container, products).render();
         break;
 
-      case 'grid':
+      case "grid":
         new GridWidget(container, products).render();
         break;
 
-      case 'list':
+      case "list":
         new ListWidget(container, products).render();
         break;
 
@@ -328,14 +336,14 @@ class GrooveShopRecommendations {
    */
   private getSkeletonHTML(attributes: WidgetAttributes): string {
     const count = attributes.count || 5;
-    const layout = attributes.layout || 'grid';
+    const layout = attributes.layout || "grid";
 
     const skeletons = Array(count)
       .fill(null)
       .map(() => renderSkeleton())
-      .join('');
+      .join("");
 
-    if (layout === 'carousel') {
+    if (layout === "carousel") {
       return `
         <div class="gs-carousel">
           <div class="gs-carousel-track">${skeletons}</div>
@@ -343,7 +351,7 @@ class GrooveShopRecommendations {
       `;
     }
 
-    if (layout === 'list') {
+    if (layout === "list") {
       return `<div class="gs-list">${skeletons}</div>`;
     }
 
@@ -353,7 +361,10 @@ class GrooveShopRecommendations {
   /**
    * Track impression
    */
-  private trackImpression(sourceProductId: string | undefined, products: Product[]): void {
+  private trackImpression(
+    sourceProductId: string | undefined,
+    products: Product[],
+  ): void {
     if (products.length === 0) return;
 
     // Use IntersectionObserver to track when widget is visible
@@ -363,7 +374,7 @@ class GrooveShopRecommendations {
           if (entry.isIntersecting) {
             products.forEach((product) => {
               this.track({
-                type: 'impression',
+                type: "impression",
                 sourceProductId,
                 targetProductId: product.entity_id,
                 timestamp: Date.now(),
@@ -375,10 +386,10 @@ class GrooveShopRecommendations {
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
-    const container = document.querySelector('.gs-recommendations');
+    const container = document.querySelector(".gs-recommendations");
     if (container) {
       observer.observe(container);
     }
@@ -390,19 +401,19 @@ class GrooveShopRecommendations {
   private attachClickHandlers(
     container: HTMLElement,
     sourceProductId: string | undefined,
-    products: Product[]
+    products: Product[],
   ): void {
-    const cards = container.querySelectorAll<HTMLElement>('.gs-card');
+    const cards = container.querySelectorAll<HTMLElement>(".gs-card");
 
     cards.forEach((card, index) => {
-      card.addEventListener('click', () => {
+      card.addEventListener("click", () => {
         const productId = card.dataset.productId;
         if (!productId) return;
 
         const product = products[index];
 
         this.track({
-          type: 'click',
+          type: "click",
           sourceProductId,
           targetProductId: productId,
           timestamp: Date.now(),
@@ -418,7 +429,10 @@ class GrooveShopRecommendations {
   /**
    * Subscribe to real-time updates for products
    */
-  private subscribeToRealtimeUpdates(container: HTMLElement, products: Product[]): void {
+  private subscribeToRealtimeUpdates(
+    container: HTMLElement,
+    products: Product[],
+  ): void {
     products.forEach((product) => {
       this.realtime.subscribe(product.entity_id, (data: RealtimeData) => {
         this.updateSocialProof(container, product.entity_id, data);
@@ -432,24 +446,29 @@ class GrooveShopRecommendations {
   private updateSocialProof(
     container: HTMLElement,
     productId: string,
-    data: RealtimeData
+    data: RealtimeData,
   ): void {
-    const card = container.querySelector<HTMLElement>(`[data-product-id="${productId}"]`);
+    const card = container.querySelector<HTMLElement>(
+      `[data-product-id="${productId}"]`,
+    );
     if (!card) return;
 
     // Find or create social proof container
-    let proofDiv = card.querySelector<HTMLElement>('.gs-social-proof');
+    let proofDiv = card.querySelector<HTMLElement>(".gs-social-proof");
 
     if (!proofDiv) {
       // Create social proof div if it doesn't exist
-      proofDiv = document.createElement('div');
-      proofDiv.className = 'gs-social-proof';
+      proofDiv = document.createElement("div");
+      proofDiv.className = "gs-social-proof";
       proofDiv.dataset.productId = productId;
 
       // Insert after image wrapper
-      const imageWrapper = card.querySelector('.gs-card-image-wrapper');
+      const imageWrapper = card.querySelector(".gs-card-image-wrapper");
       if (imageWrapper && imageWrapper.nextSibling) {
-        imageWrapper.parentNode?.insertBefore(proofDiv, imageWrapper.nextSibling);
+        imageWrapper.parentNode?.insertBefore(
+          proofDiv,
+          imageWrapper.nextSibling,
+        );
       }
     }
 
@@ -482,23 +501,23 @@ class GrooveShopRecommendations {
     }
 
     // Update the DOM
-    proofDiv.innerHTML = badges.join('');
+    proofDiv.innerHTML = badges.join("");
 
     // Hide if no badges
     if (badges.length === 0) {
-      proofDiv.style.display = 'none';
+      proofDiv.style.display = "none";
     } else {
-      proofDiv.style.display = 'flex';
+      proofDiv.style.display = "flex";
     }
 
-    this.config.log('Updated social proof for product:', productId, data);
+    this.config.log("Updated social proof for product:", productId, data);
   }
 
   /**
    * Track event
    */
   private track(event: TrackingEvent): void {
-    this.config.log('Tracking event:', event);
+    this.config.log("Tracking event:", event);
 
     // Track to our API
     this.api.trackInteraction(event);
@@ -521,7 +540,7 @@ class GrooveShopRecommendations {
 }
 
 // Auto-initialize when script loads
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   (window as any).GrooveShopRecommendations = new GrooveShopRecommendations();
 }
 

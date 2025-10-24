@@ -5,7 +5,7 @@
  */
 
 export type AnalyticsEvent = {
-  type: 'impression' | 'click' | 'view' | 'add_to_cart' | 'purchase';
+  type: "impression" | "click" | "view" | "add_to_cart" | "purchase";
   productId: string;
   sourceProductId?: string;
   position?: number;
@@ -43,7 +43,7 @@ export class AnalyticsIntegration {
   public track(event: AnalyticsEvent): void {
     // Call custom callbacks
     this.triggerCallbacks(event.type, event);
-    this.triggerCallbacks('*', event); // Wildcard listeners
+    this.triggerCallbacks("*", event); // Wildcard listeners
 
     // Send to integrations
     this.sendToGoogleAnalytics(event);
@@ -62,7 +62,7 @@ export class AnalyticsIntegration {
       try {
         callback(event);
       } catch (error) {
-        console.error('[Analytics] Callback error:', error);
+        console.error("[Analytics] Callback error:", error);
       }
     });
   }
@@ -71,19 +71,19 @@ export class AnalyticsIntegration {
    * Send event to Google Analytics 4
    */
   private sendToGoogleAnalytics(event: AnalyticsEvent): void {
-    if (typeof (window as any).gtag !== 'function') {
+    if (typeof (window as any).gtag !== "function") {
       return; // GA not installed
     }
 
     const eventName = this.mapEventName(event.type);
 
-    (window as any).gtag('event', eventName, {
+    (window as any).gtag("event", eventName, {
       product_id: event.productId,
       source_product_id: event.sourceProductId,
       position: event.position,
       score: event.score,
-      event_category: 'recommendations',
-      event_label: 'grooveshop_widget',
+      event_category: "recommendations",
+      event_label: "grooveshop_widget",
       ...event.metadata,
     });
   }
@@ -92,7 +92,7 @@ export class AnalyticsIntegration {
    * Send event to Segment
    */
   private sendToSegment(event: AnalyticsEvent): void {
-    if (typeof (window as any).analytics?.track !== 'function') {
+    if (typeof (window as any).analytics?.track !== "function") {
       return; // Segment not installed
     }
 
@@ -103,7 +103,7 @@ export class AnalyticsIntegration {
       source_product_id: event.sourceProductId,
       position: event.position,
       score: event.score,
-      widget: 'grooveshop_recommendations',
+      widget: "grooveshop_recommendations",
       ...event.metadata,
     });
   }
@@ -112,25 +112,25 @@ export class AnalyticsIntegration {
    * Send event to Facebook Pixel
    */
   private sendToFacebookPixel(event: AnalyticsEvent): void {
-    if (typeof (window as any).fbq !== 'function') {
+    if (typeof (window as any).fbq !== "function") {
       return; // Facebook Pixel not installed
     }
 
     // Map to Facebook standard events
     const fbEventMap: Record<string, string> = {
-      view: 'ViewContent',
-      click: 'ViewContent',
-      add_to_cart: 'AddToCart',
-      purchase: 'Purchase',
+      view: "ViewContent",
+      click: "ViewContent",
+      add_to_cart: "AddToCart",
+      purchase: "Purchase",
     };
 
     const fbEvent = fbEventMap[event.type];
     if (!fbEvent) return;
 
-    (window as any).fbq('track', fbEvent, {
+    (window as any).fbq("track", fbEvent, {
       content_ids: [event.productId],
-      content_type: 'product',
-      source: 'grooveshop_recommendations',
+      content_type: "product",
+      source: "grooveshop_recommendations",
       ...event.metadata,
     });
   }
@@ -140,11 +140,11 @@ export class AnalyticsIntegration {
    */
   private mapEventName(type: string): string {
     const eventMap: Record<string, string> = {
-      impression: 'recommendation_impression',
-      click: 'recommendation_click',
-      view: 'product_view',
-      add_to_cart: 'add_to_cart',
-      purchase: 'purchase',
+      impression: "recommendation_impression",
+      click: "recommendation_click",
+      view: "product_view",
+      add_to_cart: "add_to_cart",
+      purchase: "purchase",
     };
 
     return eventMap[type] || `grooveshop_${type}`;

@@ -24,9 +24,16 @@ export interface ABVariant {
 export interface WidgetAttributes {
   productId?: string;
   count?: number;
-  layout?: 'carousel' | 'grid' | 'list';
-  type?: 'similar' | 'trending' | 'bundle' | 'personalized' | 'complement' | 'recently-viewed' | 'auto';
-  theme?: 'light' | 'dark' | 'minimal';
+  layout?: "carousel" | "grid" | "list";
+  type?:
+    | "similar"
+    | "trending"
+    | "bundle"
+    | "personalized"
+    | "complement"
+    | "recently-viewed"
+    | "auto";
+  theme?: "light" | "dark" | "minimal";
   realTime?: boolean;
   userId?: string;
   testId?: string; // A/B test ID
@@ -49,7 +56,7 @@ export interface Product {
 }
 
 export interface TrackingEvent {
-  type: 'impression' | 'click' | 'view' | 'add_to_cart' | 'purchase';
+  type: "impression" | "click" | "view" | "add_to_cart" | "purchase";
   sourceProductId?: string;
   targetProductId: string;
   userId?: string;

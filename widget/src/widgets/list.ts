@@ -2,8 +2,8 @@
  * List layout renderer
  */
 
-import type { Product } from '../types';
-import { renderCard } from '../templates/card';
+import type { Product } from "../types";
+import { renderCard } from "../templates/card";
 
 export class ListWidget {
   private container: HTMLElement;
@@ -17,7 +17,7 @@ export class ListWidget {
   public render(): void {
     const html = `
       <div class="gs-list">
-        ${this.products.map(p => renderCard(p)).join('')}
+        ${this.products.map((p) => renderCard(p)).join("")}
       </div>
     `;
 

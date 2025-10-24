@@ -4,7 +4,7 @@
  * Allows testing different widget configurations with traffic splitting
  */
 
-import type { WidgetAttributes } from '../types';
+import type { WidgetAttributes } from "../types";
 
 export interface ABVariant {
   name: string;
@@ -23,7 +23,7 @@ export class ABTest {
 
   constructor(
     private testId: string,
-    private variants: ABVariant[]
+    private variants: ABVariant[],
   ) {
     // Validate variants
     this.validateVariants();
@@ -66,7 +66,7 @@ export class ABTest {
     this.sendEvent(event);
 
     // Log for debugging
-    console.log('[A/B Test]', event);
+    console.log("[A/B Test]", event);
   }
 
   /**
@@ -74,7 +74,7 @@ export class ABTest {
    */
   private validateVariants(): void {
     if (this.variants.length === 0) {
-      throw new Error('At least one variant is required');
+      throw new Error("At least one variant is required");
     }
 
     const totalWeight = this.variants.reduce((sum, v) => sum + v.weight, 0);
@@ -123,7 +123,7 @@ export class ABTest {
    * Get or create user ID
    */
   private getUserId(): string {
-    const key = 'gs_ab_user_id';
+    const key = "gs_ab_user_id";
     let userId = localStorage.getItem(key);
 
     if (!userId) {
@@ -139,9 +139,9 @@ export class ABTest {
    */
   private sendEvent(event: any): void {
     // Store events in localStorage for later sending
-    const key = 'gs_ab_events';
+    const key = "gs_ab_events";
     try {
-      const events = JSON.parse(localStorage.getItem(key) || '[]');
+      const events = JSON.parse(localStorage.getItem(key) || "[]");
       events.push(event);
 
       // Keep only last 100 events
@@ -151,7 +151,7 @@ export class ABTest {
       // Send to server (async, fire-and-forget)
       this.sendToServer(event);
     } catch (error) {
-      console.error('[A/B Test] Failed to store event:', error);
+      console.error("[A/B Test] Failed to store event:", error);
     }
   }
 
@@ -161,18 +161,19 @@ export class ABTest {
   private async sendToServer(event: any): Promise<void> {
     try {
       // Get API URL from config
-      const apiUrl = (window as any).GrooveShopConfig?.apiUrl || 'http://localhost:8080';
+      const apiUrl =
+        (window as any).GrooveShopConfig?.apiUrl || "http://localhost:8080";
 
       await fetch(`${apiUrl}/api/v1/ab-events`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(event),
       });
     } catch (error) {
       // Fail silently - events are queued in localStorage
-      console.error('[A/B Test] Failed to send event:', error);
+      console.error("[A/B Test] Failed to send event:", error);
     }
   }
 }
